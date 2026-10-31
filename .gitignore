@@ -2,3 +2,10 @@
 /myuplink-exporter
 /*.exe
 /release-assets
+
+# Local credentials; keep only reviewed example templates in Git.
+.env
+.env.*
+*.env
+!.env.example
+!*.env.example

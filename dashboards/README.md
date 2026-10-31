@@ -1,3 +1,17 @@
+# Dashboard languages
+
+| Layout | English | Swedish |
+| --- | --- | --- |
+| Dynamic tabs (schema v2) | [ctc-ecozenith-i360.dynamic.en.json](ctc-ecozenith-i360.dynamic.en.json) | [ctc-ecozenith-i360.dynamic.json](ctc-ecozenith-i360.dynamic.json) |
+| Classic sections | [ctc-ecozenith-i360.en.json](ctc-ecozenith-i360.en.json) | [ctc-ecozenith-i360.json](ctc-ecozenith-i360.json) |
+
+English uses UID `ctc-myuplink-overview-en`; Swedish uses
+`ctc-myuplink-overview`. They can coexist. The two layouts of each language share
+their UID, so importing a different layout replaces that language's dashboard.
+English translates titles, descriptions, legends, state mappings and LogQL display
+text. Query selectors, parameter IDs and raw API values/enum text are unchanged.
+Keep both language variants in sync when changing panels or queries.
+
 # Dashboard layouts
 
 Use **ctc-ecozenith-i360.dynamic.json** for Grafana with Dynamic dashboards and
@@ -5,10 +19,10 @@ schema v2. It is the layout used in the live Grafana Cloud dashboard:
 
 - Overview: connection, alarm status, system mode, poll age, outdoor/flow/tank
   temperatures, hot-water capacity and the operating state timeline.
-- Husvärme: flow, return, setpoint, degree minutes and outdoor/room values.
-- Varmvatten: temperature, capacity, setpoints and related Loki events.
-- Värmepump: pump status, compressor speed, delta-T, auxiliary power and refrigerant.
-- Loggar & felsökning: observations/changes, alarms, exporter errors and collection health.
+- Space heating / Husvärme: flow, return, setpoint, degree minutes and outdoor/room values.
+- Hot water / Varmvatten: temperature, capacity, setpoints and related Loki events.
+- Heat pump / Värmepump: pump status, compressor speed, delta-T, auxiliary power and refrigerant.
+- Logs & troubleshooting / Loggar & felsökning: observations/changes, alarms, exporter errors and collection health.
 
 Time range and data-source/device variables are shared across tabs. Import the
 v2 resource JSON through Grafana Import, or paste it into Edit → Code. Select

@@ -24,7 +24,7 @@ of cloning over it. This assumes /addons is the local app directory mounted into
 your SSH app, as in the telemetry app installation.
 
 1. Settings → Apps → Install app → top-right menu → Check for updates.
-2. Update/rebuild **myUplink Cloud telemetry** to **0.2.0**, then restart it.
+2. Update/rebuild **myUplink Cloud telemetry** to **0.3.0**, then restart it.
    This lets Prometheus reach /probe over the internal app network. No host port
    is published by that app, and its Alloy still scrapes locally as before.
 3. Under Local apps, open **Prometheus Local**, then Install.
@@ -64,7 +64,7 @@ myuplink_poll_last_success_timestamp_seconds
 
 Expected: up=1 and probe_success=1. If up=0, inspect target error: DNS failures
 usually mean a wrong internal hostname; connection refused usually means the
-telemetry app has not been rebuilt to 0.2.0 or is stopped. If up=1 but
+telemetry app has not been rebuilt to 0.2.0 or later or is stopped. If up=1 but
 probe_success=0, inspect telemetry app logs for the myUplink API failure.
 
 Check retention via Status → Command-Line Flags or:
