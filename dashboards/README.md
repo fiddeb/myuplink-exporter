@@ -45,3 +45,14 @@ units retain myUplink v2 semantics and need comparison with your CTC display:
 Validation: original PromQL targets retain their validated expressions. The
 revised layout and data-source references are checked locally. The primary
 formatted LogQL query is checked against actual Grafana Cloud logs.
+
+## Operating timeline
+
+The overview includes four state-timeline lanes: compressor (62193 RPS > 0),
+heating mode (62005 enum HC / HC mixing / DHW/HC), hot-water mode (62005 enum DHW /
+DHW/HC), and defrost (62017 enum Defrost). Enum values are selected by their API
+text, not invented numeric codes. Mode selection is not proof of delivered heat.
+Missing samples are not converted to stopped. Check collection/device health
+separately: myUplink can report a last-known value. Queries request a 15-second minimum step and 5000 points,
+but longer time ranges can use a larger step. Actual resolution is limited by
+myUplink updates and polling, so this is not a precise compressor-cycle counter.

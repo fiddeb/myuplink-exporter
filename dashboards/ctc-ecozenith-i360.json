@@ -10,7 +10,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 2,
+  "version": 3,
   "editable": true,
   "graphTooltip": 1,
   "refresh": "1m",
@@ -413,6 +413,132 @@
       }
     },
     {
+      "id": 300,
+      "title": "Drift över tid · kompressor, värmelägen och avfrostning",
+      "type": "state-timeline",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62193\"} > bool 0)",
+          "legendFormat": "Kompressor",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "(max without(valueText) (myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62005\",valueText=~\"HC|HC mixing|DHW/HC\"}))",
+          "legendFormat": "Husvärmeläge",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "refId": "C",
+          "expr": "(max without(valueText) (myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62005\",valueText=~\"DHW|DHW/HC\"}))",
+          "legendFormat": "Varmvattenläge",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "refId": "D",
+          "expr": "(max without(valueText) (myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62017\",valueText=\"Defrost\"}))",
+          "legendFormat": "Avfrostning",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        }
+      ],
+      "interval": "15s",
+      "maxDataPoints": 5000,
+      "description": "Kompressor: rapporterade RPS > 0. Värmelägen: API-status HC/HC mixing/DHW/HC respektive DHW/DHW/HC. Avfrostning: API-status Defrost. Valt läge bevisar inte avgiven värme. Saknade mätvärden ersätts inte med stopp. Kontrollera insamlingsstatus separat; myUplink kan rapportera senaste kända värde. Upplösningen begränsas av myUplinks uppdateringar, polling och Grafanas query-step; korta cykler kan missas.",
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Okänt",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Inaktiv",
+                  "color": "#464C54",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Aktiv",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 85,
+            "spanNulls": false,
+            "insertNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kompressor"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "Står still",
+                        "color": "#464C54",
+                        "index": 0
+                      },
+                      "1": {
+                        "text": "Går",
+                        "color": "green",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "auto",
+        "alignValue": "left",
+        "rowHeight": 0.8,
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
       "id": 205,
       "title": "Senaste driftobservationer och ändringar",
       "type": "logs",
@@ -422,7 +548,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 5,
+        "y": 12,
         "w": 24,
         "h": 7
       },
@@ -459,7 +585,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 12,
+        "y": 19,
         "w": 24,
         "h": 1
       }
@@ -470,7 +596,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 13,
+        "y": 20,
         "w": 12,
         "h": 4
       },
@@ -534,7 +660,7 @@
       "type": "stat",
       "gridPos": {
         "x": 12,
-        "y": 13,
+        "y": 20,
         "w": 12,
         "h": 4
       },
@@ -598,7 +724,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 24,
         "w": 14,
         "h": 8
       },
@@ -704,7 +830,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 14,
-        "y": 17,
+        "y": 24,
         "w": 10,
         "h": 8
       },
@@ -798,7 +924,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 32,
         "w": 24,
         "h": 7
       },
@@ -918,7 +1044,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 32,
+        "y": 39,
         "w": 24,
         "h": 1
       }
@@ -929,7 +1055,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 33,
+        "y": 40,
         "w": 12,
         "h": 4
       },
@@ -993,7 +1119,7 @@
       "type": "gauge",
       "gridPos": {
         "x": 12,
-        "y": 33,
+        "y": 40,
         "w": 12,
         "h": 4
       },
@@ -1056,7 +1182,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 37,
+        "y": 44,
         "w": 24,
         "h": 8
       },
@@ -1166,7 +1292,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 45,
+        "y": 52,
         "w": 24,
         "h": 6
       },
@@ -1203,7 +1329,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 51,
+        "y": 58,
         "w": 24,
         "h": 1
       }
@@ -1214,7 +1340,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 52,
+        "y": 59,
         "w": 6,
         "h": 6
       },
@@ -1278,7 +1404,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 6,
-        "y": 52,
+        "y": 59,
         "w": 18,
         "h": 6
       },
@@ -1360,7 +1486,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 58,
+        "y": 65,
         "w": 12,
         "h": 8
       },
@@ -1491,7 +1617,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 58,
+        "y": 65,
         "w": 12,
         "h": 8
       },
@@ -1585,7 +1711,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 66,
+        "y": 73,
         "w": 12,
         "h": 8
       },
@@ -1679,7 +1805,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 66,
+        "y": 73,
         "w": 12,
         "h": 8
       },
@@ -1775,7 +1901,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 74,
+        "y": 81,
         "w": 24,
         "h": 1
       }
@@ -1786,7 +1912,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 75,
+        "y": 82,
         "w": 8,
         "h": 4
       },
@@ -1850,7 +1976,7 @@
       "type": "stat",
       "gridPos": {
         "x": 8,
-        "y": 75,
+        "y": 82,
         "w": 8,
         "h": 4
       },
@@ -1931,7 +2057,7 @@
       "type": "stat",
       "gridPos": {
         "x": 16,
-        "y": 75,
+        "y": 82,
         "w": 8,
         "h": 4
       },
@@ -2007,7 +2133,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 79,
+        "y": 86,
         "w": 24,
         "h": 7
       },
@@ -2046,7 +2172,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 86,
+        "y": 93,
         "w": 24,
         "h": 7
       },
@@ -2081,7 +2207,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 93,
+        "y": 100,
         "w": 12,
         "h": 7
       },
@@ -2165,7 +2291,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 93,
+        "y": 100,
         "w": 12,
         "h": 7
       },
@@ -2247,7 +2373,7 @@
       "type": "text",
       "gridPos": {
         "x": 0,
-        "y": 100,
+        "y": 107,
         "w": 24,
         "h": 6
       },
