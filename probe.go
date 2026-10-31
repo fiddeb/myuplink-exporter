@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -24,7 +25,6 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var timeoutSeconds float64
 
-	// startTime := time.Now()
 	contextLogger := buildContextLoggerFromRequest(r)
 	registry := prometheus.NewRegistry()
 
@@ -36,37 +36,57 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds*float64(time.Second)))
+	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(timeoutSeconds*float64(time.Second)))
 	defer cancel()
 	r = r.WithContext(ctx)
 
-	// use timeout as max cache time as mostly it's also the scrape time
-	cacheTime := time.Duration(timeoutSeconds) * time.Second
+	// Keep system status and data points fresh on the same cache schedule.
+	cacheTime := time.Minute
 
 	if v := r.URL.Query().Get("cache"); v != "" {
 		cacheTime, err = time.ParseDuration(v)
-		if err != nil {
-			contextLogger.Error(err.Error())
-			http.Error(w, fmt.Sprintf("failed to parse cache from query param: %s", err), http.StatusBadRequest)
+		if err != nil || cacheTime <= 0 {
+			http.Error(w, fmt.Sprintf("cache must be a positive duration: %q", v), http.StatusBadRequest)
 			return
 		}
 	}
 
 	metrics := NewMyUplinkMetrics(registry)
+	success := true
+	defer func() {
+		metrics.probeSuccess.Set(boolFloat(success))
+		promhttp.HandlerFor(registry, promhttp.HandlerOpts{}).ServeHTTP(w, r)
+	}()
 
-	systemList, err := cacheResult(
-		"systems",
+	systemList, err := cacheResultWithDuration(
+		"systems", cacheTime,
 		func() (interface{}, error) {
 			return myuplinkClient.GetSystems(ctx)
 		},
 	)
 	if err != nil {
 		contextLogger.Error(err.Error())
-		http.Error(w, fmt.Sprintf("failed to fetch system list from myUplink: %s", err), http.StatusBadRequest)
+		success = false
 		return
 	}
 
 	for _, system := range systemList.(*myuplink.ResultSystems).Systems {
+		metrics.systemHasAlarm.WithLabelValues(system.SystemID).Set(boolFloat(system.HasAlarm))
+		if Opts.MyUplink.CollectAlarms {
+			alarms, alarmErr := cacheResultWithDuration("alarms:"+system.SystemID, cacheTime, func() (interface{}, error) {
+				return myuplinkClient.GetSystemActiveAlarms(ctx, system.SystemID)
+			})
+			if alarmErr != nil {
+				contextLogger.Error(alarmErr.Error())
+				success = false
+			} else {
+				list := alarms.([]myuplink.Alarm)
+				metrics.systemActiveAlarms.WithLabelValues(system.SystemID).Set(float64(len(list)))
+				for _, alarm := range list {
+					metrics.systemAlarm.WithLabelValues(system.SystemID, alarm.DeviceID, strconv.Itoa(alarm.AlarmNumber), strconv.Itoa(alarm.Severity)).Add(1)
+				}
+			}
+		}
 		metrics.system.With(prometheus.Labels{
 			"systemID":   system.SystemID,
 			"systemName": clearText(system.Name),
@@ -74,11 +94,6 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 		}).Set(1)
 
 		for _, device := range system.Devices {
-			if !device.IsConnectionStateAllowed(Opts.MyUplink.Device.AllowedConnectionStates) {
-				contextLogger.Warnf(`ignoring system "%s" device "%s", connection state is "%s"`, system.Name, device.ID, device.ConnectionState)
-				continue
-			}
-
 			metrics.systemDevice.With(prometheus.Labels{
 				"systemID":        system.SystemID,
 				"deviceID":        device.ID,
@@ -87,6 +102,12 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 				"connectionState": clearText(device.ConnectionState),
 				"firmwareVersion": clearText(device.CurrentFwVersion),
 			}).Set(1)
+			metrics.systemDeviceConnected.WithLabelValues(system.SystemID, device.ID).Set(boolFloat(strings.EqualFold(device.ConnectionState, "Connected")))
+
+			if !device.IsConnectionStateAllowed(Opts.MyUplink.Device.AllowedConnectionStates) {
+				contextLogger.Warnf(`ignoring system "%s" device "%s", connection state is "%s"`, system.Name, device.ID, device.ConnectionState)
+				continue
+			}
 
 			devicePoints, err := cacheResultWithDuration(
 				fmt.Sprintf("devicePoints:%s", device.ID),
@@ -97,11 +118,14 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 			)
 			if err != nil {
 				contextLogger.Error(err.Error())
-				http.Error(w, fmt.Sprintf("failed to fetch device points from myUplink: %s", err), http.StatusBadRequest)
-				return
+				success = false
+				continue
 			}
 
 			for _, devicePoint := range *devicePoints.(*myuplink.SystemDevicePoints) {
+				if !devicePoint.Timestamp.IsZero() {
+					metrics.pointTimestamp.WithLabelValues(system.SystemID, device.ID, devicePoint.ParameterID).Set(float64(devicePoint.Timestamp.UnixNano()) / 1e9)
+				}
 				if devicePoint.Value != nil {
 					metrics.systemDevicePoint.With(prometheus.Labels{
 						"systemID":      system.SystemID,
@@ -148,9 +172,6 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
-	h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
-	h.ServeHTTP(w, r)
 }
 
 func buildContextLoggerFromRequest(r *http.Request) *slogger.Logger {
@@ -171,27 +192,14 @@ func getPrometheusTimeout(r *http.Request, defaultTimeout float64) (timeout floa
 			return
 		}
 	}
+	if math.IsNaN(timeout) || math.IsInf(timeout, 0) || timeout < 0 || timeout > float64(math.MaxInt64)/float64(time.Second) {
+		return 0, fmt.Errorf("invalid scrape timeout")
+	}
 	if timeout == 0 {
 		timeout = defaultTimeout
 	}
 
 	return
-}
-
-// cacheResult caches template function results (eg. Azure REST API resource information)
-func cacheResult(cacheKey string, callback func() (interface{}, error)) (interface{}, error) {
-	if val, ok := globalCache.Get(cacheKey); ok {
-		return val, nil
-	}
-
-	ret, err := callback()
-	if err != nil {
-		return nil, err
-	}
-
-	globalCache.SetDefault(cacheKey, ret)
-
-	return ret, nil
 }
 
 func cacheResultWithDuration(cacheKey string, cacheTime time.Duration, callback func() (interface{}, error)) (interface{}, error) {
@@ -216,4 +224,11 @@ func clearText(val string) string {
 	val = strings.TrimSpace(val)
 
 	return val
+}
+
+func boolFloat(value bool) float64 {
+	if value {
+		return 1
+	}
+	return 0
 }

@@ -1,0 +1,22 @@
+name: ci/go
+
+on:
+  pull_request:
+  push:
+    branches: [main, improve-monitoring]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - run: go test -race ./...
+      - run: go vet ./...
+      - run: go build ./...

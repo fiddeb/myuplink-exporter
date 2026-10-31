@@ -17,7 +17,8 @@ type (
 		}
 
 		MyUplink struct {
-			Url string `long:"myuplink.url" env:"MYUPLINK_URL" description:"Url to myUplink API" default:"https://api.myuplink.com"`
+			CollectAlarms bool   `long:"myuplink.collect-alarms" env:"MYUPLINK_COLLECT_ALARMS" description:"Collect active alarm details (additional API requests)"`
+			Url           string `long:"myuplink.url" env:"MYUPLINK_URL" description:"Url to myUplink API" default:"https://api.myuplink.com"`
 
 			Auth struct {
 				ClientID     string `long:"myuplink.auth.clientid"      env:"MYUPLINK_AUTH_CLIENTID"      description:"ClientID from myUplink" required:"yes"`

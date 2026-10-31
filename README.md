@@ -6,6 +6,92 @@
 
 A Prometheus exporter for myuplink.com device metrics
 
+## Fork improvements
+
+This fork builds on [webdevops/myuplink-exporter](https://github.com/webdevops/myuplink-exporter).
+Existing metric names and labels remain available. New metrics are on `/probe`;
+`/metrics` continues to expose the exporter's Go runtime metrics.
+
+| Metric | Meaning |
+| --- | --- |
+| `myuplink_probe_success` | 1 when all requested collections succeeded, otherwise 0 |
+| `myuplink_system_has_alarm{systemID}` | System's active-alarm flag; no extra API calls |
+| `myuplink_system_device_connected{systemID,deviceID}` | 1 for Connected, otherwise 0; includes devices excluded from point collection |
+| `myuplink_system_device_point_timestamp_seconds{systemID,deviceID,parameterID}` | Source timestamp in Unix seconds; omitted if absent from the API |
+| `myuplink_system_active_alarms{systemID}` | Active notification count; requires alarm details |
+| `myuplink_system_alarm_active{systemID,deviceID,alarmNumber,severity}` | Active notification count per alarm group; requires alarm details |
+
+Enable alarm details with `--myuplink.collect-alarms` or
+`MYUPLINK_COLLECT_ALARMS=true`. This adds one API call per system per page when
+the cache expires. Severity uses the API's numeric scale (1 is most severe).
+Alarm UUIDs and localized messages are excluded from labels. Resolved alarm
+groups disappear on refresh and the total becomes zero. An alarm request failure
+omits the alarm count rather than claiming zero alarms.
+
+Systems, points and optional alarm details are cached for **60 seconds** by
+default. Override with `/probe?cache=2m`; the duration must be positive. Discovery
+and alarm status can be as old as this cache interval. Source point timestamps
+allow detection of data that stopped updating upstream. Concurrent probes can
+still issue duplicate API reads on a cache miss; an existing entry retains the TTL
+from the request that created it. This is a cache, not a global rate limiter.
+Select an interval suitable for your device count and API quota.
+
+Device point failures do not suppress healthy devices. API collection failures
+return HTTP 200 with `myuplink_probe_success 0`; invalid arguments return HTTP 400.
+**Alert on both Prometheus `up` and `myuplink_probe_success`.** A successful probe
+can use cached data; it does not mean every device is online or every point is
+fresh. Offline devices retain info and connection metrics even though the default
+point filter skips them.
+
+System and active-alarm discovery follow pagination. Token refresh failures
+return collection errors and may recover on the next probe. Concurrent requests
+share synchronized token renewal. Initial startup authentication retains
+upstream's fail-fast behavior.
+
+### Build and run this fork
+
+```sh
+git clone https://github.com/fiddeb/myuplink-exporter.git
+cd myuplink-exporter
+git switch improve-monitoring
+go test -race ./...
+go build -o myuplink-exporter .
+# Set MYUPLINK_AUTH_CLIENTID and MYUPLINK_AUTH_CLIENTSECRET in the environment.
+./myuplink-exporter --myuplink.collect-alarms
+```
+
+The container badges above refer to upstream images. Build these changes locally
+with `docker build -t myuplink-exporter:local .` before running that image.
+
+Prometheus example:
+
+```yaml
+scrape_configs:
+  - job_name: myuplink
+    scrape_interval: 60s
+    scrape_timeout: 25s
+    metrics_path: /probe
+    params:
+      cache: ["60s"]
+    static_configs:
+      - targets: ["myuplink-exporter:8080"]
+```
+
+Useful alert expressions (adapt thresholds to your installation):
+
+```promql
+myuplink_probe_success == 0
+myuplink_system_has_alarm == 1
+myuplink_system_device_connected == 0
+time() - myuplink_system_device_point_timestamp_seconds > 600
+```
+
+Points still use v2 and upstream's existing value/unit semantics. Future work:
+verify v3 scaling against real devices, add rate-limit-aware background polling
+and collection timestamps, and introduce optional normalized metrics. Do not
+derive energy counters by summing arbitrary instantaneous point values. The
+inherited optional total-parameter accumulator is unchanged.
+
 Usage
 -----
 
@@ -19,6 +105,7 @@ Application Options:
       --log.source=[|short|file|full]              Show source for every log message (useful for debugging and bug reports) [$LOG_SOURCE]
       --log.color=[|auto|yes|no]                   Enable color for logs [$LOG_COLOR]
       --log.time                                   Show log time [$LOG_TIME]
+      --myuplink.collect-alarms                    Collect active alarm details [$MYUPLINK_COLLECT_ALARMS]
       --myuplink.url=                              Url to myUplink API (default: https://api.myuplink.com) [$MYUPLINK_URL]
       --myuplink.auth.clientid=                    ClientID from myUplink [$MYUPLINK_AUTH_CLIENTID]
       --myuplink.auth.clientsecret=                ClientSecret from myUplink [$MYUPLINK_AUTH_CLIENTSECRET]
