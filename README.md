@@ -183,3 +183,12 @@ logging is separate from these application logs.
 See [API coverage](docs/api-coverage.md) for the reviewed endpoints, missing
 collectors and live-device validation still required. This exporter is not yet
 comprehensive across all monitoring features in the public API.
+
+## Raspberry Pi and Grafana Cloud
+
+See [the Raspberry Pi deployment guide](docs/raspberry-pi.md) and `deploy/` for
+a systemd service, root-only environment templates, Alloy journal collection,
+Loki forwarding and Prometheus remote write. Text events include `observed_at`;
+formatted numeric strings are now suppressed unless
+`--myuplink.log-numeric-strings` is enabled. Empty strings still count as textual
+state changes. Numeric enum comparisons preserve fractional values.

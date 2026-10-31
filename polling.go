@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -76,7 +77,12 @@ func newEventTracker() *eventTracker {
 
 var events *eventTracker
 
+var numericString = regexp.MustCompile(`^[+-]?(?:[0-9]+(?:[.,][0-9]+)?|[.,][0-9]+)(?:[eE][+-]?[0-9]+)?\s*(?:°C|°F|K|%|kWh|Wh|kW|W|bar|Pa|kPa|MPa|min|days|day|h|s|rpm|RPS)?$`)
+
 func (e *eventTracker) point(system, device, param, value string, timestamp time.Time) {
+	if !Opts.MyUplink.LogNumericStrings && numericString.MatchString(strings.TrimSpace(value)) {
+		return
+	}
 	key := system + "/" + device + "/" + param
 	old, exists := e.strings[key]
 	if exists && old == value {
@@ -86,7 +92,7 @@ func (e *eventTracker) point(system, device, param, value string, timestamp time
 	if !exists {
 		kind = "observed"
 	}
-	logger.Info("myUplink string point", slog.String("event", "point_"+kind), slog.String("system_id", system), slog.String("device_id", device), slog.String("parameter_id", param), slog.String("value", value), slog.Time("source_timestamp", timestamp))
+	logger.Info("myUplink string point", slog.Time("observed_at", time.Now().UTC()), slog.String("event", "point_"+kind), slog.String("system_id", system), slog.String("device_id", device), slog.String("parameter_id", param), slog.String("value", value), slog.Time("source_timestamp", timestamp))
 	e.strings[key] = value
 }
 func (e *eventTracker) alarmSet(system string, current map[string]bool) {
@@ -97,12 +103,12 @@ func (e *eventTracker) alarmSet(system string, current map[string]bool) {
 			if !known {
 				kind = "alarm_observed"
 			}
-			logger.Info("myUplink alarm", slog.String("event", kind), slog.String("system_id", system), slog.String("alarm_id", id))
+			logger.Info("myUplink alarm", slog.Time("observed_at", time.Now().UTC()), slog.String("event", kind), slog.String("system_id", system), slog.String("alarm_id", id))
 		}
 	}
 	for id := range previous {
 		if !current[id] {
-			logger.Info("myUplink alarm", slog.String("event", "alarm_no_longer_active"), slog.String("system_id", system), slog.String("alarm_id", id))
+			logger.Info("myUplink alarm", slog.Time("observed_at", time.Now().UTC()), slog.String("event", "alarm_no_longer_active"), slog.String("system_id", system), slog.String("alarm_id", id))
 		}
 	}
 	e.alarms[system] = current

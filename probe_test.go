@@ -49,7 +49,7 @@ func TestProbeMonitoring(t *testing.T) {
 				fmt.Fprint(w, `[{"parameterId":"p","value":12.5}]`)
 				return
 			}
-			fmt.Fprint(w, `[{"parameterId":"p","value":12.5,"timestamp":"2026-01-01T00:00:00Z"}]`)
+			fmt.Fprint(w, `[{"parameterId":"p","value":12.5,"timestamp":"2026-01-01T00:00:00Z","enumValues":[{"value":"12.50","text":"fractional"},{"value":"12","text":"integer"}]}]`)
 		default:
 			t.Errorf("unexpected API call: %s", r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
@@ -92,6 +92,8 @@ func TestProbeMonitoring(t *testing.T) {
 	contains(body, `myuplink_system_has_alarm{systemID="s"} 1`)
 	contains(body, `myuplink_system_device_point_timestamp_seconds{deviceID="good",parameterID="p",systemID="s"} 1.7672256e+09`)
 	contains(body, "myuplink_probe_success 1")
+	contains(body, `myuplink_system_device_point_enum{category="",deviceID="good",parameterID="p",parameterName="",parameterUnit="",systemID="s",valueText="fractional"} 1`)
+	contains(body, `myuplink_system_device_point_enum{category="",deviceID="good",parameterID="p",parameterName="",parameterUnit="",systemID="s",valueText="integer"} 0`)
 	if alarmCalls != 0 {
 		t.Fatal("alarm detail collection must be opt-in")
 	}

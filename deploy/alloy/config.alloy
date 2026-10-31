@@ -1,0 +1,45 @@
+// Merge with an existing Alloy configuration rather than replacing it.
+// Keep the journal ingestion timestamp; source_timestamp can be old/change-based.
+loki.source.journal "myuplink" {
+  matches    = "_SYSTEMD_UNIT=myuplink-exporter.service"
+  max_age    = "1h"
+  labels     = {
+    service_name = "myuplink-exporter",
+    host         = constants.hostname,
+  }
+  forward_to = [loki.write.myuplink_cloud.receiver]
+}
+
+// The original JSON remains intact. Use LogQL | json at query time.
+// Device/parameter/alarm IDs and values are deliberately not stream labels.
+loki.write "myuplink_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_LOKI_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_LOKI_USER")
+      password = sys.env("GRAFANA_CLOUD_LOKI_TOKEN")
+    }
+  }
+}
+
+prometheus.scrape "myuplink" {
+  targets = [{
+    __address__ = "127.0.0.1:8080",
+    job         = "myuplink",
+    instance    = constants.hostname,
+  }]
+  metrics_path    = "/probe"
+  scrape_interval = "15s"
+  scrape_timeout  = "5s"
+  forward_to      = [prometheus.remote_write.myuplink_cloud.receiver]
+}
+
+prometheus.remote_write "myuplink_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_METRICS_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_METRICS_USER")
+      password = sys.env("GRAFANA_CLOUD_METRICS_TOKEN")
+    }
+  }
+}

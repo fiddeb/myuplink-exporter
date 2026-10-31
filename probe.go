@@ -148,10 +148,10 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 					}).Set(*devicePoint.Value)
 
 					// enum translation
-					enumValue := fmt.Sprintf("%d", int64(*devicePoint.Value))
+					enumValue := *devicePoint.Value
 					for _, enumVal := range devicePoint.EnumValues {
 						enumMetricVal := float64(0)
-						if enumVal.Value == enumValue {
+						if parsed, parseErr := strconv.ParseFloat(enumVal.Value, 64); parseErr == nil && parsed == enumValue {
 							enumMetricVal = 1
 						}
 

@@ -46,3 +46,26 @@ func TestSnapshotScrapes(t *testing.T) {
 		}
 	}
 }
+
+func TestNumericStringFiltering(t *testing.T) {
+	oldLogger, oldOpts := logger, Opts
+	defer func() { logger, Opts = oldLogger, oldOpts }()
+	var out bytes.Buffer
+	logger = slogger.NewCliLogger(&out, slogger.WithFormat(slogger.FormatMode("json")))
+	tracker := newEventTracker()
+	for _, value := range []string{"6°C", "60%", "0kWh", "-42.3", "9.1", "15.7bar"} {
+		tracker.point("s", "d", "p", value, time.Now())
+	}
+	if out.Len() != 0 {
+		t.Fatal("numeric values logged by default")
+	}
+	tracker.point("s", "d", "state", "Normal", time.Now())
+	if !strings.Contains(out.String(), "observed_at") || !strings.Contains(out.String(), "point_observed") {
+		t.Fatal(out.String())
+	}
+	Opts.MyUplink.LogNumericStrings = true
+	tracker.point("s", "d", "p", "6°C", time.Now())
+	if !strings.Contains(out.String(), "6°C") {
+		t.Fatal("numeric opt-in failed")
+	}
+}

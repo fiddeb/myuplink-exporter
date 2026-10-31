@@ -72,7 +72,7 @@ Expected:
 - `myuplink_poll_last_success_timestamp_seconds` advances on successful polls.
 - Devices visible in myUplink have appropriate connection status.
 - No current alarms means active count zero, not a fabricated alarm event.
-- First non-null strVal values generate point_observed; unchanged values do not
+- First textual strVal values generate point_observed; formatted numeric strings are suppressed by default (enable --myuplink.log-numeric-strings to include them). Unchanged values do not
   produce duplicate events. Empty strings are supported. No string points means
   no point events, which can be normal for a device.
 - Existing alarms generate alarm_observed on first successful alarm collection.
