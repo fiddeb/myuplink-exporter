@@ -145,3 +145,23 @@ client id and secret for your application.
 | `myuplink_system_info`                 | System information                       |
 | `myuplink_system_device_info`          | Device information (belongs to a system) |
 | `myuplink_system_device_point`         | Device parameter metric point            |
+
+## API errors and coverage
+
+API failures are returned as `*myuplink.APIError`; token endpoint failures use
+`*myuplink.OAuthError`. Use `errors.As` to inspect errors even when wrapped.
+Actual HTTP status remains authoritative when the body reports a different status,
+is HTML/empty/malformed, or exceeds the 64 KiB error-body limit. Error codes accept
+string or integer encodings because the published Swagger does not define the
+ErrorCodes schema. Unknown JSON fields are ignored. `Retry-After` is retained for
+future scheduling; this change does not implement a new retry policy.
+
+Structured probe error logs expose operation, HTTP status, error code and body
+parsing status (plus source timestamp for API errors). Details, additional data,
+OAuth descriptions/URIs and raw response bodies are retained where applicable
+for callers but are not logged automatically. Transport-level HTTP trace/debug
+logging is separate from these application logs.
+
+See [API coverage](docs/api-coverage.md) for the reviewed endpoints, missing
+collectors and live-device validation still required. This exporter is not yet
+comprehensive across all monitoring features in the public API.

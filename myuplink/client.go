@@ -30,6 +30,7 @@ func NewClient(logger *slogger.Logger) *Client {
 		http:   resty.New(),
 	}
 
+	c.http.SetTransport(errorBodyTransport{base: c.http.Transport()})
 	c.http.SetRetryCount(5)
 	c.http.SetRetryWaitTime(5 * time.Second)
 	c.http.SetRetryMaxWaitTime(30 * time.Second)
@@ -84,7 +85,7 @@ func (c *Client) connect(ctx context.Context) error {
 	}
 
 	if !resp.IsStatusSuccess() {
-		return fmt.Errorf(`unable to login to myUplink, expected status code 200, got %v`, resp.Status())
+		return responseError(resp, "token", true)
 	}
 
 	if result.AccessToken == "" || result.ExpiresIn <= 0 {
@@ -119,7 +120,7 @@ func (c *Client) GetSystems(ctx context.Context) (*ResultSystems, error) {
 			return nil, err
 		}
 		if !resp.IsStatusSuccess() {
-			return nil, fmt.Errorf("unable to fetch systems, got %s", resp.Status())
+			return nil, responseError(resp, "systems", false)
 		}
 		result.Systems = append(result.Systems, batch.Systems...)
 		result.NumItems = batch.NumItems
@@ -147,7 +148,7 @@ func (c *Client) GetSystemActiveAlarms(ctx context.Context, systemID string) ([]
 			return nil, err
 		}
 		if !resp.IsStatusSuccess() {
-			return nil, fmt.Errorf("unable to fetch active alarms, got %s", resp.Status())
+			return nil, responseError(resp, "active_alarms", false)
 		}
 		alarms = append(alarms, batch.Notifications...)
 		size := batch.ItemsPerPage
@@ -175,7 +176,7 @@ func (c *Client) GetSystemDevicePoints(ctx context.Context, deviceId string) (*S
 	}
 
 	if !resp.IsStatusSuccess() {
-		return nil, fmt.Errorf(`unable to fetch device points from myUplink, expected status code 200, got %v`, resp.Status())
+		return nil, responseError(resp, "device_points", false)
 	}
 
 	return result, nil
@@ -196,7 +197,7 @@ func (c *Client) GetSystemDeviceFirmware(ctx context.Context, deviceId string) (
 	}
 
 	if !resp.IsStatusSuccess() {
-		return nil, fmt.Errorf(`unable to fetch device firmware info from myUplink, expected status code 200, got %v`, resp.Status())
+		return nil, responseError(resp, "firmware_info", false)
 	}
 
 	return result, nil

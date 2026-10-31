@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -31,7 +32,7 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 	// If a timeout is configured via the Prometheus header, add it to the request.
 	timeoutSeconds, err = getPrometheusTimeout(r, DefaultTimeout)
 	if err != nil {
-		contextLogger.Error(err.Error())
+		logCollectionError(contextLogger, err)
 		http.Error(w, fmt.Sprintf("failed to parse timeout from Prometheus header: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -65,7 +66,7 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		contextLogger.Error(err.Error())
+		logCollectionError(contextLogger, err)
 		success = false
 		return
 	}
@@ -77,7 +78,7 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 				return myuplinkClient.GetSystemActiveAlarms(ctx, system.SystemID)
 			})
 			if alarmErr != nil {
-				contextLogger.Error(alarmErr.Error())
+				logCollectionError(contextLogger, alarmErr)
 				success = false
 			} else {
 				list := alarms.([]myuplink.Alarm)
@@ -117,7 +118,7 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 				},
 			)
 			if err != nil {
-				contextLogger.Error(err.Error())
+				logCollectionError(contextLogger, err)
 				success = false
 				continue
 			}
@@ -231,4 +232,18 @@ func boolFloat(value bool) float64 {
 		return 1
 	}
 	return 0
+}
+
+// Use errors.As so wrapped authentication errors retain structured fields.
+func logCollectionError(logger *slogger.Logger, err error) {
+	var apiErr *myuplink.APIError
+	var oauthErr *myuplink.OAuthError
+	switch {
+	case errors.As(err, &apiErr):
+		logger.Error("myUplink API request failed", slog.Any("error", apiErr))
+	case errors.As(err, &oauthErr):
+		logger.Error("myUplink authentication failed", slog.Any("error", oauthErr))
+	default:
+		logger.Error(err.Error())
+	}
 }
