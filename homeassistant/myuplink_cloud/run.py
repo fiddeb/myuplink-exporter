@@ -60,7 +60,7 @@ def main():
     failed = False
     reader = None
     try:
-        children.append(subprocess.Popen(["myuplink-exporter", "--server.bind=127.0.0.1:8080",
+        children.append(subprocess.Popen(["myuplink-exporter", "--server.bind=0.0.0.0:8080",
             "--log.format=json", "--log.time", "--myuplink.collect-alarms"],
             env=exporter_env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True))
         def copy_logs():

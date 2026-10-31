@@ -97,8 +97,9 @@ the app Log tab. Device faults must not be triggered for testing.
 
 Exporter JSON is copied to /data/exporter.jsonl (5 MiB, two rotated backups) and
 the app Log tab. Alloy reads it with source.file, not host journald. Cursor/WAL
-state lives in /data/alloy and survives restarts. No external metrics or Alloy UI
-ports are exposed. Log ingestion time is used; source_timestamp stays in JSON.
+state lives in /data/alloy and survives restarts. No host metrics or Alloy UI
+ports are published. Exporter port 8080 is accessible to other apps on the internal
+network (for Prometheus Local); Alloy UI stays on container loopback. Log ingestion time is used; source_timestamp stays in JSON.
 Rotation/outages can still lose events; there is no exactly-once guarantee.
 Initial observations repeat on restart. The child processes are stopped together;
 if either exits the app stops rather than silently running half a pipeline.

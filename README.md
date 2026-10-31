@@ -201,3 +201,11 @@ It bundles the exporter and Alloy with private file-based log transport, so no
 host systemd installation or Docker socket access is needed. Follow its local
 installation and Grafana Cloud configuration guide. The first full container
 build and Supervisor installation still need validation on a real HAOS host.
+
+## Local metrics retention on Home Assistant OS
+
+[Prometheus Local](homeassistant/prometheus_local/DOCS.md) is a separate app with
+persistent /data/tsdb storage, 180-day/2-GB default retention and configurable
+scrape targets. Update the combined telemetry app to 0.2.0 for internal-network
+scraping. Cloud retention is unchanged; local history is queried in Prometheus
+or a local Grafana data source.
