@@ -1,3 +1,24 @@
+# Dashboard layouts
+
+Use **ctc-ecozenith-i360.dynamic.json** for Grafana with Dynamic dashboards and
+schema v2. It is the layout used in the live Grafana Cloud dashboard:
+
+- Overview: connection, alarm status, system mode, poll age, outdoor/flow/tank
+  temperatures, hot-water capacity and the operating state timeline.
+- Husvärme: flow, return, setpoint, degree minutes and outdoor/room values.
+- Varmvatten: temperature, capacity, setpoints and related Loki events.
+- Värmepump: pump status, compressor speed, delta-T, auxiliary power and refrigerant.
+- Loggar & felsökning: observations/changes, alarms, exporter errors and collection health.
+
+Time range and data-source/device variables are shared across tabs. Import the
+v2 resource JSON through Grafana Import, or paste it into Edit → Code. Select
+Prometheus and Loki, then Instance, System and Device. The file contains no
+private instance, system or device defaults. Its UID matches the classic layout;
+importing it replaces that layout for the same dashboard.
+
+The classic `ctc-ecozenith-i360.json` remains available for Grafana without v2
+layout support; it uses sections instead of tabs.
+
 # CTC EcoZenith i360 dashboard
 
 Import `ctc-ecozenith-i360.json` through Grafana → Dashboards → New → Import →
