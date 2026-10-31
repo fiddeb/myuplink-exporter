@@ -4,6 +4,22 @@ loki.source.file "exporter" {
     service_name = "myuplink-exporter",
     instance     = sys.env("MYUPLINK_INSTANCE"),
   }]
+  forward_to = [loki.process.exporter.receiver]
+}
+
+// Preserve JSON for drilldown; index only bounded severity/event fields.
+// Keep ingestion time: source_timestamp may represent an old value change.
+loki.process "exporter" {
+  stage.json {
+    expressions = { severity = "level", event = "event" }
+  }
+  stage.template {
+    source = "severity"
+    template = "{{ ToLower .Value }}"
+  }
+  stage.labels {
+    values = { level = "severity", event = "event" }
+  }
   forward_to = [loki.write.cloud.receiver]
 }
 

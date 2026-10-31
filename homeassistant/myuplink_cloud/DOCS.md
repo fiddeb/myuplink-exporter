@@ -111,3 +111,13 @@ off-device. This environment does not have Docker: the full image build, Supervi
 installation, ARM64 runtime and real Grafana Cloud delivery still need the first
 installation test on your Pi. Nothing has been installed or changed in your Home
 Assistant by creating these files.
+
+## Upgrade to 0.3.0
+
+Copy the updated app directory from branch `improve-monitoring` into
+`/addons/myuplink_cloud`, then rebuild/update the local app and restart it.
+Version 0.3.0 parses JSON and attaches bounded `level` and `event` labels in
+Alloy. Raw JSON remains intact; IDs and values are not indexed labels.
+Existing logs are unchanged. The dashboard formats both old and new logs using
+`| json | line_format`. Log time remains ingestion time; `source_timestamp`
+may be much older because it represents the upstream value's timestamp.

@@ -14,15 +14,16 @@ source for local retention. A Cloud Grafana cannot reach a private Home Assistan
 
 ## Panels
 
-25 panels cover connection and system alarm status, collection success, outdoor
-and water temperatures, tank capacity, enum status text, heating setpoint/return,
-compressor RPS, pump %, refrigerant temperatures/pressures, degree minutes,
-instantaneous auxiliary power, poll age and source timestamps.
+Panels are grouped into Driftöversikt, Husvärme, Varmvatten, Värmepump och
+tillsats, and Larm och felsökning. Select both Prometheus and Loki data sources.
+Log panels format JSON at query time, preserving fields for drilldown and working
+with logs already stored before the Alloy update. Startup observations are
+explicitly distinguished from changes. System alarm history is system-wide;
+exporter warnings/errors are instance-wide. Log panels show at most 200 lines.
 
-The layout uses only built-in Grafana panel types and a selectable Prometheus
-data source. No plugin, Loki data source, or dashboard provisioning permissions
-are required. Loki can be queried separately with
-`{service_name="myuplink-exporter"} | json`.
+A quiet period can legitimately have no logs: unchanged values are not repeated.
+Expand the time range to include startup, or wait for a real state change.
+Prometheus and Loki may have different retention even on the same dashboard.
 
 ## Interpretation
 
@@ -41,8 +42,6 @@ units retain myUplink v2 semantics and need comparison with your CTC display:
 - The source timestamp diagnostic may reflect last change rather than last poll;
   it is not used as a definitive device-freshness alarm.
 
-Validation: JSON structure and panel layout checked; all 35 PromQL target
-expressions (with template values substituted) parsed with Prometheus promtool;
-point IDs checked against the supplied metrics sample. The dashboard has not yet
-been imported/rendered in your live Grafana. On import, verify data source and
-variable selections first, then compare current values with the manufacturer app.
+Validation: original PromQL targets retain their validated expressions. The
+revised layout and data-source references are checked locally. The primary
+formatted LogQL query is checked against actual Grafana Cloud logs.

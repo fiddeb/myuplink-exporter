@@ -1,5 +1,5 @@
 name: myUplink Cloud telemetry
-version: "0.2.0"
+version: "0.3.0"
 slug: myuplink_cloud
 description: myUplink exporter and Alloy for Grafana Cloud logs and metrics
 url: https://github.com/fiddeb/myuplink-exporter
