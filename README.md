@@ -192,3 +192,12 @@ Loki forwarding and Prometheus remote write. Text events include `observed_at`;
 formatted numeric strings are now suppressed unless
 `--myuplink.log-numeric-strings` is enabled. Empty strings still count as textual
 state changes. Numeric enum comparisons preserve fractional values.
+
+## Home Assistant OS
+
+For aarch64 Home Assistant OS (including Raspberry Pi 5), use the combined local
+app in [homeassistant/myuplink_cloud](homeassistant/myuplink_cloud/DOCS.md).
+It bundles the exporter and Alloy with private file-based log transport, so no
+host systemd installation or Docker socket access is needed. Follow its local
+installation and Grafana Cloud configuration guide. The first full container
+build and Supervisor installation still need validation on a real HAOS host.
