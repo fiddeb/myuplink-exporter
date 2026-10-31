@@ -342,7 +342,7 @@
           "values": false
         },
         "textMode": "name",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -406,7 +406,7 @@
           "values": false
         },
         "textMode": "name",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -480,7 +480,7 @@
                 },
                 "1": {
                   "text": "Active",
-                  "color": "green",
+                  "color": "blue",
                   "index": 1
                 }
               }
@@ -513,7 +513,7 @@
                       },
                       "1": {
                         "text": "Running",
-                        "color": "green",
+                        "color": "blue",
                         "index": 1
                       }
                     }
@@ -648,7 +648,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -712,7 +712,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -1107,7 +1107,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -1148,7 +1148,8 @@
           "decimals": 1,
           "noValue": "No data",
           "color": {
-            "mode": "palette-classic"
+            "mode": "fixed",
+            "fixedColor": "#FFFFFF"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1173,7 +1174,7 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": false
       }
     },
     {
@@ -1392,7 +1393,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -1941,7 +1942,7 @@
           "decimals": 1,
           "noValue": "No data",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1949,6 +1950,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
               }
             ]
           }
@@ -2086,7 +2091,7 @@
           "decimals": 1,
           "noValue": "No data",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",

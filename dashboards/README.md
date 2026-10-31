@@ -14,6 +14,19 @@ Keep both language variants in sync when changing panels or queries.
 
 # Dashboard layouts
 
+## Colors
+
+Ordinary stat values use neutral theme text (white in dark mode). Hot-water
+capacity gauges use white, without implying an unverified healthy range.
+Connection, system alarms and API success retain explicit green/red mappings.
+Active alarm count is green at zero and red from one. Poll age uses the existing
+green/orange/red thresholds at 180 and 300 seconds. Timeline activity is blue,
+inactivity gray: running is an operating state, not a health assessment.
+Time-series colors still distinguish measurements. These choices apply to both
+languages and layouts. Repository variables remain selectable; when updating
+a customized live dashboard, apply the visual changes to its existing JSON to
+preserve its data sources, variable visibility and selected values.
+
 Use **ctc-ecozenith-i360.dynamic.json** for Grafana with Dynamic dashboards and
 schema v2. It is the layout used in the live Grafana Cloud dashboard:
 
