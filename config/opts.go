@@ -17,8 +17,11 @@ type (
 		}
 
 		MyUplink struct {
-			CollectAlarms bool   `long:"myuplink.collect-alarms" env:"MYUPLINK_COLLECT_ALARMS" description:"Collect active alarm details (additional API requests)"`
-			Url           string `long:"myuplink.url" env:"MYUPLINK_URL" description:"Url to myUplink API" default:"https://api.myuplink.com"`
+			PollInterval    time.Duration `long:"myuplink.poll-interval" env:"MYUPLINK_POLL_INTERVAL" default:"60s" description:"Delay between background polls; 0 enables legacy scrape collection"`
+			PollTimeout     time.Duration `long:"myuplink.poll-timeout" env:"MYUPLINK_POLL_TIMEOUT" default:"55s" description:"Maximum duration of each background poll"`
+			RequestInterval time.Duration `long:"myuplink.request-interval" env:"MYUPLINK_REQUEST_INTERVAL" default:"3s" description:"Minimum delay between API requests"`
+			CollectAlarms   bool          `long:"myuplink.collect-alarms" env:"MYUPLINK_COLLECT_ALARMS" description:"Collect active alarm details (additional API requests)"`
+			Url             string        `long:"myuplink.url" env:"MYUPLINK_URL" description:"Url to myUplink API" default:"https://api.myuplink.com"`
 
 			Auth struct {
 				ClientID     string `long:"myuplink.auth.clientid"      env:"MYUPLINK_AUTH_CLIENTID"      description:"ClientID from myUplink" required:"yes"`

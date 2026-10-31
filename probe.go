@@ -82,6 +82,13 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 				success = false
 			} else {
 				list := alarms.([]myuplink.Alarm)
+				if events != nil {
+					current := make(map[string]bool)
+					for _, a := range list {
+						current[a.ID] = true
+					}
+					events.alarmSet(system.SystemID, current)
+				}
 				metrics.systemActiveAlarms.WithLabelValues(system.SystemID).Set(float64(len(list)))
 				for _, alarm := range list {
 					metrics.systemAlarm.WithLabelValues(system.SystemID, alarm.DeviceID, strconv.Itoa(alarm.AlarmNumber), strconv.Itoa(alarm.Severity)).Add(1)
@@ -124,6 +131,9 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for _, devicePoint := range *devicePoints.(*myuplink.SystemDevicePoints) {
+				if events != nil && devicePoint.StrVal != nil {
+					events.point(system.SystemID, device.ID, devicePoint.ParameterID, *devicePoint.StrVal, devicePoint.Timestamp)
+				}
 				if !devicePoint.Timestamp.IsZero() {
 					metrics.pointTimestamp.WithLabelValues(system.SystemID, device.ID, devicePoint.ParameterID).Set(float64(devicePoint.Timestamp.UnixNano()) / 1e9)
 				}

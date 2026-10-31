@@ -19,6 +19,7 @@ type (
 		clientId     string
 		clientSecret string
 
+		gate    *requestGate
 		tokenMu sync.Mutex
 		token   *AuthToken
 	}
@@ -30,7 +31,8 @@ func NewClient(logger *slogger.Logger) *Client {
 		http:   resty.New(),
 	}
 
-	c.http.SetTransport(errorBodyTransport{base: c.http.Transport()})
+	c.gate = &requestGate{base: errorBodyTransport{base: c.http.Transport()}}
+	c.http.SetTransport(c.gate)
 	c.http.SetRetryCount(5)
 	c.http.SetRetryWaitTime(5 * time.Second)
 	c.http.SetRetryMaxWaitTime(30 * time.Second)

@@ -6,6 +6,24 @@
 
 A Prometheus exporter for myuplink.com device metrics
 
+## Background collection (current branch)
+
+The default is now background polling: `/probe` serves a snapshot and makes no
+API calls. Poll delay is `--myuplink.poll-interval=60s`, timeout is
+`--myuplink.poll-timeout=55s`, and request spacing is
+`--myuplink.request-interval=3s`. Set poll interval to `0` for legacy scrape
+collection. Legacy cache settings below apply only to that mode.
+
+Non-null `strVal` changes (including empty strings) and active-alarm transitions
+are structured stderr log events. State is in memory and restart emits initial
+observations again. Events are generated only by background polling. Snapshot
+last success is exposed as `myuplink_poll_last_success_timestamp_seconds`.
+429 responses delay all later requests using Retry-After with a 60-second fallback.
+Initial auth failure in background mode is recoverable on later polls.
+
+See [the testing guide](docs/testing.md) for build, live verification and
+Prometheus setup, and [coverage](docs/api-coverage.md) for remaining collectors.
+
 ## Fork improvements
 
 This fork builds on [webdevops/myuplink-exporter](https://github.com/webdevops/myuplink-exporter).
