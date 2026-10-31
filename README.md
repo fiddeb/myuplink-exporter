@@ -209,3 +209,10 @@ persistent /data/tsdb storage, 180-day/2-GB default retention and configurable
 scrape targets. Update the combined telemetry app to 0.2.0 for internal-network
 scraping. Cloud retention is unchanged; local history is queried in Prometheus
 or a local Grafana data source.
+
+## Grafana dashboard
+
+Import [CTC EcoZenith i360](dashboards/ctc-ecozenith-i360.json) for temperatures,
+operating states, domestic hot water and collection health. Choose a Prometheus
+data source and the instance/system/device from dropdowns. See
+[dashboard instructions and interpretation notes](dashboards/README.md).
