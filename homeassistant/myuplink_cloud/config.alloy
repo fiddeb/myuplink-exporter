@@ -1,0 +1,56 @@
+loki.source.file "exporter" {
+  targets = [{
+    __path__     = "/data/exporter.jsonl",
+    service_name = "myuplink-exporter",
+    instance     = sys.env("MYUPLINK_INSTANCE"),
+  }]
+  forward_to = [loki.process.exporter.receiver]
+}
+
+// Preserve JSON for drilldown; index only bounded severity/event fields.
+// Keep ingestion time: source_timestamp may represent an old value change.
+loki.process "exporter" {
+  stage.json {
+    expressions = { severity = "level", event = "event" }
+  }
+  stage.template {
+    source = "severity"
+    template = "{{ ToLower .Value }}"
+  }
+  stage.labels {
+    values = { level = "severity", event = "event" }
+  }
+  forward_to = [loki.write.cloud.receiver]
+}
+
+loki.write "cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_LOKI_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_LOKI_USER")
+      password = sys.env("GRAFANA_CLOUD_LOKI_TOKEN")
+    }
+  }
+}
+
+prometheus.scrape "exporter" {
+  targets = [{
+    __address__ = "127.0.0.1:8080",
+    job         = "myuplink",
+    instance    = sys.env("MYUPLINK_INSTANCE"),
+  }]
+  metrics_path = "/probe"
+  scrape_interval = "15s"
+  scrape_timeout = "5s"
+  forward_to = [prometheus.remote_write.cloud.receiver]
+}
+
+prometheus.remote_write "cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_METRICS_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_METRICS_USER")
+      password = sys.env("GRAFANA_CLOUD_METRICS_TOKEN")
+    }
+  }
+}

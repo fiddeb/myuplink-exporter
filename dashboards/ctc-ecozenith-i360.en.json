@@ -1,0 +1,5705 @@
+{
+  "id": null,
+  "uid": "ctc-myuplink-overview-en",
+  "title": "CTC EcoZenith i360 · myUplink (English)",
+  "description": "CTC EcoZenith i360: operation, space heating, hot water, heat pump and logs.",
+  "tags": [
+    "myuplink",
+    "CTC",
+    "heatpump"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 3,
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "1m",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Prometheus",
+        "type": "datasource",
+        "query": "prometheus",
+        "refresh": 1,
+        "options": [],
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "loki",
+        "label": "Loki",
+        "type": "datasource",
+        "query": "loki",
+        "refresh": 1,
+        "current": {},
+        "options": []
+      },
+      {
+        "name": "instance",
+        "label": "Instance",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "query": {
+          "query": "label_values(myuplink_system_device_point{job=\"myuplink\"}, instance)",
+          "refId": "instance"
+        },
+        "definition": "label_values(myuplink_system_device_point{job=\"myuplink\"}, instance)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "system",
+        "label": "System",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "query": {
+          "query": "label_values(myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\"}, systemID)",
+          "refId": "system"
+        },
+        "definition": "label_values(myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\"}, systemID)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "device",
+        "label": "Device",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "query": {
+          "query": "label_values(myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\"}, deviceID)",
+          "refId": "device"
+        },
+        "definition": "label_values(myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\"}, deviceID)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {},
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 2,
+      "title": "Connection",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_connected{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Offline",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Online",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "title": "System alarms",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "description": "System-wide: may include devices other than the selected one.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_has_alarm{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "No alarms",
+                  "color": "green",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Active alarm",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 8,
+      "title": "Heat pump · operating mode",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "description": "Shows the API enum text for the active value. Missing enum data is displayed as No data, not an assumed operating mode.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62017\"} == 1",
+          "legendFormat": "{{valueText}}",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 9,
+      "title": "System · operating mode",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "description": "Shows the API enum text for the active value. Missing enum data is displayed as No data, not an assumed operating mode.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62005\"} == 1",
+          "legendFormat": "{{valueText}}",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 500,
+      "title": "System overview · heat pump, hot water and home",
+      "type": "canvas",
+      "pluginVersion": "13.3.0",
+      "description": "Schematic overview, not a verified hydraulic diagram. Values are last-reported API values and may be stale on collection failure. Missing data is shown as —. Click readings or detail links to navigate. Electric power and Immersion heater are shown separately, not summed.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62000\"}",
+          "legendFormat": "Outdoor",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62037\"}",
+          "legendFormat": "Pump outlet",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "C",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62027\"}",
+          "legendFormat": "Pump inlet",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "D",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62276\"}",
+          "legendFormat": "Tank temperature",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "E",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62279\"}",
+          "legendFormat": "Hot water capacity",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "F",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62203\"}",
+          "legendFormat": "Indoor temperature",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "G",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61509\"}",
+          "legendFormat": "Room setpoint",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "H",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62007\"}",
+          "legendFormat": "Heating setpoint",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "I",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62011\"}",
+          "legendFormat": "Heating flow",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "J",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62015\"}",
+          "legendFormat": "Heating return",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "K",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62193\"}",
+          "legendFormat": "Compressor speed",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "L",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62107\"}",
+          "legendFormat": "Charge pump",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "M",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62168\"}",
+          "legendFormat": "Electric power",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "N",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62361\"}",
+          "legendFormat": "Immersion heater",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        },
+        {
+          "refId": "O",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62167\"}",
+          "legendFormat": "Degree minutes",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#F4F5F8"
+          },
+          "decimals": 1,
+          "noValue": "—",
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Outdoor"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pump outlet"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pump inlet"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tank temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Hot water capacity"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Indoor temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Room setpoint"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Heating setpoint"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Heating flow"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Heating return"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Compressor speed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:rps"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#5B6F8C",
+                      "value": 0
+                    },
+                    {
+                      "color": "blue",
+                      "value": 1e-06
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Charge pump"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Electric power"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kwatt"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Immersion heater"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kwatt"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Degree minutes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View details",
+                    "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                    "targetBlank": false,
+                    "oneClick": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "inlineEditing": false,
+        "panZoom": true,
+        "zoomToContent": true,
+        "showAdvancedTypes": false,
+        "tooltip": {
+          "mode": "single",
+          "disableForOneClick": false
+        },
+        "root": {
+          "name": "Heat pump system",
+          "type": "frame",
+          "placement": {
+            "left": 0,
+            "top": 0,
+            "width": 1160,
+            "height": 480
+          },
+          "background": {
+            "color": {
+              "fixed": "transparent"
+            }
+          },
+          "elements": [
+            {
+              "name": "pump-heading",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 20,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "OUTDOOR UNIT"
+                }
+              },
+              "placement": {
+                "left": 20,
+                "top": 12,
+                "width": 270,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "tank-heading",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 20,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "ECOZENITH i360"
+                }
+              },
+              "placement": {
+                "left": 455,
+                "top": 12,
+                "width": 270,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "house-heading",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 20,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "SPACE HEATING"
+                }
+              },
+              "placement": {
+                "left": 870,
+                "top": 12,
+                "width": 270,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "outside-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Outdoor"
+                }
+              },
+              "placement": {
+                "left": 35,
+                "top": 59,
+                "width": 105,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Outdoor",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 26,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Outdoor"
+                }
+              },
+              "placement": {
+                "left": 145,
+                "top": 51,
+                "width": 125,
+                "height": 40
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "pump-pipe-supply",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 275,
+                "top": 166,
+                "width": 220,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#D9A65C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "pump-pipe-return",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 275,
+                "top": 244,
+                "width": 220,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#6C9FDE"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "house-pipe-supply",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 655,
+                "top": 166,
+                "width": 245,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#D9A65C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "house-pipe-return",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 655,
+                "top": 244,
+                "width": 245,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#6C9FDE"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "outdoor-unit",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 35,
+                "top": 116,
+                "width": 240,
+                "height": 160
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#202B3B"
+                }
+              },
+              "border": {
+                "width": 1,
+                "radius": 16,
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              }
+            },
+            {
+              "name": "fan-ring",
+              "type": "ellipse",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 54,
+                "top": 135,
+                "width": 120,
+                "height": 120
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#162130"
+                }
+              },
+              "border": {
+                "width": 1,
+                "radius": 0,
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              }
+            },
+            {
+              "name": "fan-inner",
+              "type": "ellipse",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 66,
+                "top": 147,
+                "width": 96,
+                "height": 96
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 1,
+                "radius": 0,
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              }
+            },
+            {
+              "name": "fan-blade-0",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 76,
+                "top": 190,
+                "width": 76,
+                "height": 8,
+                "rotation": 0
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "field": "Compressor speed",
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 4,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "fan-blade-45",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 76,
+                "top": 190,
+                "width": 76,
+                "height": 8,
+                "rotation": 45
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "field": "Compressor speed",
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 4,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "fan-blade-90",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 76,
+                "top": 190,
+                "width": 76,
+                "height": 8,
+                "rotation": 90
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "field": "Compressor speed",
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 4,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "fan-blade-135",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 76,
+                "top": 190,
+                "width": 76,
+                "height": 8,
+                "rotation": 135
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "field": "Compressor speed",
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 4,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "fan-hub",
+              "type": "ellipse",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 101,
+                "top": 182,
+                "width": 26,
+                "height": 26
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "field": "Compressor speed",
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "grille-0",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 192,
+                "top": 143,
+                "width": 60,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "grille-1",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 192,
+                "top": 162,
+                "width": 60,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "grille-2",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 192,
+                "top": 181,
+                "width": 60,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "grille-3",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 192,
+                "top": 200,
+                "width": 60,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "grille-4",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 192,
+                "top": 219,
+                "width": 60,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "grille-5",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 192,
+                "top": 238,
+                "width": 60,
+                "height": 4
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "pump-foot-65",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 65,
+                "top": 276,
+                "width": 32,
+                "height": 8
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "pump-foot-220",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 220,
+                "top": 276,
+                "width": 32,
+                "height": 8
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#5B6F8C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "pump-out-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Pump outlet"
+                }
+              },
+              "placement": {
+                "left": 298,
+                "top": 111,
+                "width": 175,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Pump outlet",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 25,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Pump outlet"
+                }
+              },
+              "placement": {
+                "left": 298,
+                "top": 135,
+                "width": 175,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "pump-in-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Pump inlet"
+                }
+              },
+              "placement": {
+                "left": 298,
+                "top": 190,
+                "width": 175,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Pump inlet",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 25,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Pump inlet"
+                }
+              },
+              "placement": {
+                "left": 298,
+                "top": 213,
+                "width": 175,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "tank-body",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 495,
+                "top": 86,
+                "width": 160,
+                "height": 230
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#243245"
+                }
+              },
+              "border": {
+                "width": 1,
+                "radius": 24,
+                "color": {
+                  "fixed": "#6F839F"
+                }
+              }
+            },
+            {
+              "name": "tank-band",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 502,
+                "top": 100,
+                "width": 146,
+                "height": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#D9A65C"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 3,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "tank-temperature-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Tank temperature"
+                }
+              },
+              "placement": {
+                "left": 501,
+                "top": 125,
+                "width": 148,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Tank temperature",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 32,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Tank temperature"
+                }
+              },
+              "placement": {
+                "left": 499,
+                "top": 150,
+                "width": 152,
+                "height": 48
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "capacity-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Hot water capacity"
+                }
+              },
+              "placement": {
+                "left": 501,
+                "top": 218,
+                "width": 148,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Hot water capacity",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 27,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Hot water capacity"
+                }
+              },
+              "placement": {
+                "left": 501,
+                "top": 244,
+                "width": 148,
+                "height": 40
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "roof",
+              "type": "triangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 888,
+                "top": 51,
+                "width": 242,
+                "height": 100
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#28394E"
+                }
+              },
+              "border": {
+                "width": 1,
+                "radius": 0,
+                "color": {
+                  "fixed": "#6F839F"
+                }
+              }
+            },
+            {
+              "name": "house-body",
+              "type": "rectangle",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": ""
+                }
+              },
+              "placement": {
+                "left": 905,
+                "top": 151,
+                "width": 210,
+                "height": 162
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "#202B3B"
+                }
+              },
+              "border": {
+                "width": 1,
+                "radius": 3,
+                "color": {
+                  "fixed": "#6F839F"
+                }
+              }
+            },
+            {
+              "name": "indoor-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Indoor temperature"
+                }
+              },
+              "placement": {
+                "left": 920,
+                "top": 165,
+                "width": 180,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Indoor temperature",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 31,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Indoor temperature"
+                }
+              },
+              "placement": {
+                "left": 920,
+                "top": 190,
+                "width": 180,
+                "height": 42
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "room-target-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 13,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Room setpoint"
+                }
+              },
+              "placement": {
+                "left": 915,
+                "top": 241,
+                "width": 190,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Room setpoint",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 23,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Room setpoint"
+                }
+              },
+              "placement": {
+                "left": 920,
+                "top": 266,
+                "width": 180,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "target-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 13,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Flow setpoint"
+                }
+              },
+              "placement": {
+                "left": 696,
+                "top": 267,
+                "width": 180,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Heating setpoint",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 22,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Heating setpoint"
+                }
+              },
+              "placement": {
+                "left": 696,
+                "top": 291,
+                "width": 180,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "flow-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Flow temperature"
+                }
+              },
+              "placement": {
+                "left": 696,
+                "top": 111,
+                "width": 180,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Heating flow",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 25,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Heating flow"
+                }
+              },
+              "placement": {
+                "left": 696,
+                "top": 135,
+                "width": 180,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "return-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Return"
+                }
+              },
+              "placement": {
+                "left": 696,
+                "top": 190,
+                "width": 180,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Heating return",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 25,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Heating return"
+                }
+              },
+              "placement": {
+                "left": 696,
+                "top": 213,
+                "width": 180,
+                "height": 30
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "compressor-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Compressor"
+                }
+              },
+              "placement": {
+                "left": 35,
+                "top": 323,
+                "width": 120,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Compressor speed",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 25,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Compressor speed"
+                }
+              },
+              "placement": {
+                "left": 35,
+                "top": 349,
+                "width": 120,
+                "height": 36
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "charge-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Charge pump"
+                }
+              },
+              "placement": {
+                "left": 165,
+                "top": 323,
+                "width": 120,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Charge pump",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 25,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Charge pump"
+                }
+              },
+              "placement": {
+                "left": 165,
+                "top": 349,
+                "width": 120,
+                "height": 36
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "aux-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Auxiliary power"
+                }
+              },
+              "placement": {
+                "left": 455,
+                "top": 332,
+                "width": 155,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Electric power",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 24,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Electric power"
+                }
+              },
+              "placement": {
+                "left": 455,
+                "top": 358,
+                "width": 155,
+                "height": 36
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "immersion-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Immersion heater"
+                }
+              },
+              "placement": {
+                "left": 620,
+                "top": 332,
+                "width": 165,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Immersion heater",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 24,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Immersion heater"
+                }
+              },
+              "placement": {
+                "left": 620,
+                "top": 358,
+                "width": 165,
+                "height": 36
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "degree-label",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 15,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Degree minutes"
+                }
+              },
+              "placement": {
+                "left": 900,
+                "top": 324,
+                "width": 205,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            },
+            {
+              "name": "Degree minutes",
+              "type": "metric-value",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 26,
+                "color": {
+                  "fixed": "#F4F5F8"
+                },
+                "text": {
+                  "mode": "field",
+                  "fixed": "",
+                  "field": "Degree minutes"
+                }
+              },
+              "placement": {
+                "left": 900,
+                "top": 350,
+                "width": 205,
+                "height": 36
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "pump-link",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#8AB8F0"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Heat pump →",
+                  "field": "Compressor speed"
+                }
+              },
+              "placement": {
+                "left": 35,
+                "top": 402,
+                "width": 250,
+                "height": 28
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=17",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "tank-link",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#8AB8F0"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Hot water →",
+                  "field": "Tank temperature"
+                }
+              },
+              "placement": {
+                "left": 455,
+                "top": 402,
+                "width": 330,
+                "height": 28
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=13",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "house-link",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 16,
+                "color": {
+                  "fixed": "#8AB8F0"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Space heating →",
+                  "field": "Heating flow"
+                }
+              },
+              "placement": {
+                "left": 875,
+                "top": 402,
+                "width": 250,
+                "height": 28
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "links": [
+                {
+                  "title": "View details",
+                  "url": "/d/ctc-myuplink-overview-en?${__all_variables}&from=${__from}&to=${__to}&viewPanel=12",
+                  "targetBlank": false,
+                  "oneClick": true
+                }
+              ]
+            },
+            {
+              "name": "schematic-note",
+              "type": "text",
+              "config": {
+                "align": "center",
+                "valign": "middle",
+                "size": 13,
+                "color": {
+                  "fixed": "#A8B3C7"
+                },
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Schematic connections · lines do not represent measured flow · check collection health above"
+                }
+              },
+              "placement": {
+                "left": 20,
+                "top": 448,
+                "width": 1120,
+                "height": 24
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "width": 0,
+                "radius": 0,
+                "color": {
+                  "fixed": "transparent"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 15
+      }
+    },
+    {
+      "id": 300,
+      "title": "Operation over time · compressor, heating modes and defrost",
+      "type": "state-timeline",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62193\"} > bool 0)",
+          "legendFormat": "Compressor",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "(max without(valueText) (myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62005\",valueText=~\"HC|HC mixing|DHW/HC\"}))",
+          "legendFormat": "Space heating mode",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "refId": "C",
+          "expr": "(max without(valueText) (myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62005\",valueText=~\"DHW|DHW/HC\"}))",
+          "legendFormat": "Hot water mode",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "refId": "D",
+          "expr": "(max without(valueText) (myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62017\",valueText=\"Defrost\"}))",
+          "legendFormat": "Defrost",
+          "instant": false,
+          "range": true,
+          "editorMode": "code"
+        }
+      ],
+      "interval": "15s",
+      "maxDataPoints": 5000,
+      "description": "Compressor: reported RPS > 0. Heating modes: API states HC/HC mixing/DHW/HC and DHW/DHW/HC respectively. Defrost: API state Defrost. Selected mode does not prove heat output. Missing samples are not replaced with stopped. Check collection health separately; myUplink may report the last known value. Resolution is limited by myUplink updates, polling and the Grafana query step; short cycles may be missed.",
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "Unknown",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Inactive",
+                  "color": "#464C54",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Active",
+                  "color": "blue",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 85,
+            "spanNulls": false,
+            "insertNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Compressor"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "Stopped",
+                        "color": "#464C54",
+                        "index": 0
+                      },
+                      "1": {
+                        "text": "Running",
+                        "color": "blue",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "auto",
+        "alignValue": "left",
+        "rowHeight": 0.8,
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 205,
+      "title": "Latest operating observations and changes",
+      "type": "logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"myuplink-exporter\",instance=~\"$instance\"} | json | __error__=\"\" | system_id=~\"$system\" | device_id=~\"$device\" | event=~\"point_observed|point_changed\" | line_format `{{ if eq .event \"point_observed\" }}Observed at startup{{ else }}Changed{{ end }} · {{ if eq .parameter_id \"62017\" }}Heat pump{{ else if eq .parameter_id \"62005\" }}System mode{{ else if eq .parameter_id \"62246\" }}Heating circuit{{ else if eq .parameter_id \"61500\" }}Hot water mode{{ else if eq .parameter_id \"61671\" }}Heating program{{ else if eq .parameter_id \"62253\" }}Model{{ else }}Parameter {{ .parameter_id }}{{ end }} = {{ .value }}`",
+          "queryType": "range",
+          "editorMode": "code",
+          "maxLines": 200,
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          }
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "description": "Shows up to 200 lines in the selected time range. Expand a line for fields. An empty panel means no matching events were found; it does not verify collection health."
+    },
+    {
+      "id": 106,
+      "type": "row",
+      "title": "Space heating",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 34,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 5,
+      "title": "Outdoor",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 12,
+        "h": 4
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62000\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Flow temperature",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 35,
+        "w": 12,
+        "h": 4
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62011\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 510,
+      "title": "Heating curve · slope",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 39,
+        "w": 12,
+        "h": 4
+      },
+      "description": "Reported curve slope setting; not a temperature measured by the outdoor sensor.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61513\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 511,
+      "title": "Heating curve · adjustment",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 39,
+        "w": 12,
+        "h": 4
+      },
+      "description": "Reported curve adjustment setting. Slope and adjustment alone do not describe every control correction.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61517\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 12,
+      "title": "Heating circuit · flow and return",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 43,
+        "w": 14,
+        "h": 8
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62007\"}",
+          "legendFormat": "Setpoint",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62011\"}",
+          "legendFormat": "Flow temperature",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "C",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62015\"}",
+          "legendFormat": "Return",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 16,
+      "title": "Degree minutes",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 14,
+        "y": 43,
+        "w": 10,
+        "h": 8
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62167\"}",
+          "legendFormat": "Degree minutes",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61571\"}",
+          "legendFormat": "Start threshold",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "title": "Outdoor and room",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 24,
+        "h": 7
+      },
+      "description": "62203 is the measured indoor temperature and 61509 the room setpoint, confirmed for this installation. Verify the sensor mapping on other installations.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62000\"}",
+          "legendFormat": "Outdoor",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62147\"}",
+          "legendFormat": "Outdoor at heat pump",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "C",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62203\"}",
+          "legendFormat": "Indoor temperature",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "D",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61509\"}",
+          "legendFormat": "Room setpoint",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 112,
+      "type": "row",
+      "title": "Hot water",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 58,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 7,
+      "title": "Hot water tank",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 59,
+        "w": 12,
+        "h": 4
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62276\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 10,
+      "title": "Hot water capacity",
+      "type": "gauge",
+      "gridPos": {
+        "x": 12,
+        "y": 59,
+        "w": 12,
+        "h": 4
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62279\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FFFFFF"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      }
+    },
+    {
+      "id": 13,
+      "title": "Hot water · temperature and setpoints",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 63,
+        "w": 24,
+        "h": 8
+      },
+      "description": "62003 is omitted: the sample export reported -32768 °C, whose meaning needs verification.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62276\"}",
+          "legendFormat": "Tank",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61502\"}",
+          "legendFormat": "Hot water setpoint",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "C",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62001\"}",
+          "legendFormat": "Heat pump stop temperature",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 216,
+      "title": "Hot water · events",
+      "type": "logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 71,
+        "w": 24,
+        "h": 6
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"myuplink-exporter\",instance=~\"$instance\"} | json | __error__=\"\" | system_id=~\"$system\" | device_id=~\"$device\" | event=~\"point_observed|point_changed\" | parameter_id=\"61500\" | line_format `{{ if eq .event \"point_observed\" }}Observed at startup{{ else }}Changed{{ end }} · {{ if eq .parameter_id \"62017\" }}Heat pump{{ else if eq .parameter_id \"62005\" }}System mode{{ else if eq .parameter_id \"62246\" }}Heating circuit{{ else if eq .parameter_id \"61500\" }}Hot water mode{{ else if eq .parameter_id \"61671\" }}Heating program{{ else if eq .parameter_id \"62253\" }}Model{{ else }}Parameter {{ .parameter_id }}{{ end }} = {{ .value }}`",
+          "queryType": "range",
+          "editorMode": "code",
+          "maxLines": 200,
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          }
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "description": "Shows up to 200 lines in the selected time range. Expand a line for fields. An empty panel means no matching events were found; it does not verify collection health."
+    },
+    {
+      "id": 117,
+      "type": "row",
+      "title": "Heat pump and auxiliary heating",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 77,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 512,
+      "title": "Compressor runtime · last 24 h",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 78,
+        "w": 24,
+        "h": 3
+      },
+      "description": "Reported rolling 24-hour runtime, converted from minutes to hours. This is not a cumulative counter; do not apply rate/increase.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62234\"} / 60",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:h",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 11,
+      "title": "Compressor speed",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 81,
+        "w": 6,
+        "h": 6
+      },
+      "description": "The API parameter is RPS, not rpm.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62193\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:rps",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 15,
+      "title": "Heat pump temperature difference",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 6,
+        "y": 81,
+        "w": 18,
+        "h": 6
+      },
+      "description": "Difference in °C, not heat output or COP. Matches the other labels for the same device.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62037\"} - ignoring(parameterID,parameterName,parameterUnit,category) myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62027\"}",
+          "legendFormat": "Heat pump outlet − inlet",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "title": "Compressor and circulation pump",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 87,
+        "w": 12,
+        "h": 8
+      },
+      "description": "RPS and percent use different units and are shown on separate axes.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62193\"}",
+          "legendFormat": "Compressor RPS",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62107\"}",
+          "legendFormat": "Charge pump %",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Compressor RPS"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:rps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Charge pump %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "title": "Auxiliary heating · instantaneous electrical power",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 87,
+        "w": 12,
+        "h": 8
+      },
+      "description": "Shown separately, not added together because overlap between parameters has not been verified. 61590/61591 are settings, not verified consumption.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62168\"}",
+          "legendFormat": "Electric power",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62361\"}",
+          "legendFormat": "Immersion heater power",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "title": "Refrigerant · temperatures",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 95,
+        "w": 12,
+        "h": 8
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62047\"}",
+          "legendFormat": "Discharge gas",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62057\"}",
+          "legendFormat": "Suction gas",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 19,
+      "title": "Refrigerant · pressures",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 95,
+        "w": 12,
+        "h": 8
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62067\"}",
+          "legendFormat": "High pressure",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62077\"}",
+          "legendFormat": "Low pressure",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pressurebar",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 124,
+      "type": "row",
+      "title": "Alarms and troubleshooting",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 103,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 22,
+      "title": "Active alarms · count",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 104,
+        "w": 8,
+        "h": 4
+      },
+      "description": "Requires collect-alarms. No data must not be interpreted as zero.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_active_alarms{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "title": "API collection",
+      "type": "stat",
+      "gridPos": {
+        "x": 8,
+        "y": 104,
+        "w": 8,
+        "h": 4
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_probe_success{job=\"myuplink\",instance=~\"$instance\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Failed",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 21,
+      "title": "Time since successful poll",
+      "type": "stat",
+      "gridPos": {
+        "x": 16,
+        "y": 104,
+        "w": 8,
+        "h": 4
+      },
+      "description": "Exporter health at instance level. More than 5 minutes is shown in red; adjust for your polling interval.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min(time() - myuplink_poll_last_success_timestamp_seconds{job=\"myuplink\",instance=~\"$instance\"}, 0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 180
+              },
+              {
+                "color": "red",
+                "value": 300
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 228,
+      "title": "System alarms · history",
+      "type": "logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 108,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"myuplink-exporter\",instance=~\"$instance\"} | json | __error__=\"\" | system_id=~\"$system\" | event=~\"alarm_.*\" | line_format `{{ if eq .event \"alarm_no_longer_active\" }}No longer active{{ else if eq .event \"alarm_observed\" }}Active at first observation{{ else }}Activated{{ end }} · Alarm {{ .alarm_id }}`",
+          "queryType": "range",
+          "editorMode": "code",
+          "maxLines": 200,
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          }
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "description": "Shows up to 200 lines in the selected time range. Expand a line for fields. An empty panel means no matching events were found; it does not verify collection health."
+    },
+    {
+      "id": 229,
+      "title": "Exporter · warnings and errors",
+      "type": "logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 115,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{service_name=\"myuplink-exporter\",instance=~\"$instance\"} | json | __error__=\"\" | level=~\"(?i)warn|warning|error|fatal\" | line_format `{{ .level }} · {{ .msg }} {{ if .error }}· {{ .error }}{{ end }}`",
+          "queryType": "range",
+          "editorMode": "code",
+          "maxLines": 200,
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          }
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "description": "Shows up to 200 lines in the selected time range. Expand a line for fields. An empty panel means no matching events were found; it does not verify collection health."
+    },
+    {
+      "id": 23,
+      "title": "API collection over time",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 122,
+        "w": 12,
+        "h": 7
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_probe_success{job=\"myuplink\",instance=~\"$instance\"}",
+          "legendFormat": "Collection succeeded",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 1,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 24,
+      "title": "Source timestamp · age of selected points",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 122,
+        "w": 12,
+        "h": 7
+      },
+      "description": "Diagnostic: the timestamp may represent the last value change. An old timestamp does not prove the sensor is offline. Use the polling panel for API health.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min(time() - myuplink_system_device_point_timestamp_seconds{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=~\"62000|62011|62276\"}, 0)",
+          "legendFormat": "Parameter {{parameterID}}",
+          "instant": false,
+          "range": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 25,
+      "title": "Interpretation and further verification",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 129,
+        "w": 24,
+        "h": 6
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**How to read this dashboard**\n\n- **Observed at startup** is an initial value, not a change. **Changed** is logged when a text value changes.\n- Log time reflects collection/ingestion. `source_timestamp` may represent the last value change at myUplink.\n- Alarms apply to the entire system. Exporter errors and collection health apply to the entire instance.\n- Logs use the selected **Loki** source; metrics use the selected **Prometheus** source. Their retention may differ.\n- No data is not zero. COP and energy consumption are not calculated from unverified values.\n- Expand log lines for technical fields. An empty log panel may mean nothing changed in the selected time range."
+      }
+    }
+  ],
+  "links": []
+}

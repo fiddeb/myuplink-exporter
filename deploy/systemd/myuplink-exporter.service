@@ -1,0 +1,22 @@
+[Unit]
+Description=myUplink Prometheus exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+EnvironmentFile=/etc/myuplink-exporter/exporter.env
+ExecStart=/usr/local/bin/myuplink-exporter --server.bind=127.0.0.1:8080 --log.format=json --log.time --myuplink.collect-alarms
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=myuplink-exporter
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

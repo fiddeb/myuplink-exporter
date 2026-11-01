@@ -50,14 +50,20 @@ func main() {
 
 	logger.Infof("connecting to myUplink")
 	myuplinkClient = myuplink.NewClient(logger)
-	myuplinkClient.SetDebugMode(Opts.Logger.Level == "trace")
+	// HTTP wire debugging can expose credentials and upstream response data.
+	myuplinkClient.SetDebugMode(false)
+	myuplinkClient.SetRequestInterval(Opts.MyUplink.RequestInterval)
 	myuplinkClient.SetApiUrl(Opts.MyUplink.Url)
 	myuplinkClient.SetUserAgent(UserAgent + gitTag)
 	myuplinkClient.SetAuth(Opts.MyUplink.Auth.ClientID, Opts.MyUplink.Auth.ClientSecret)
-	if err := myuplinkClient.Connect(context.Background()); err != nil {
-		logger.Fatal("failed to connect to myuplink", slog.Any("error", err))
+	if Opts.MyUplink.PollInterval < 0 || Opts.MyUplink.PollTimeout <= 0 || Opts.MyUplink.RequestInterval < 0 {
+		logger.Fatal("invalid polling durations")
 	}
-
+	if Opts.MyUplink.PollInterval == 0 {
+		if err := myuplinkClient.Connect(context.Background()); err != nil {
+			logger.Fatal("failed to connect to myuplink", slog.Any("error", err))
+		}
+	}
 	logger.Infof("starting http server on %s", Opts.Server.Bind)
 	startHttpServer()
 }
@@ -99,7 +105,14 @@ func startHttpServer() {
 	})
 
 	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/probe", myuplinkProbe)
+	if Opts.MyUplink.PollInterval > 0 {
+		events = newEventTracker()
+		snapshot := &pollSnapshot{lastSuccess: time.Unix(0, 0)}
+		go snapshot.run(context.Background(), Opts.MyUplink.PollInterval, Opts.MyUplink.PollTimeout)
+		mux.Handle("/probe", snapshot)
+	} else {
+		mux.HandleFunc("/probe", myuplinkProbe)
+	}
 
 	srv := &http.Server{
 		Addr:         Opts.Server.Bind,

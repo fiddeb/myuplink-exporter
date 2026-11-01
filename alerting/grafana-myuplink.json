@@ -1,0 +1,250 @@
+{
+  "apiVersion": 1,
+  "groups": [
+    {
+      "orgId": 1,
+      "name": "myuplink",
+      "folder": "Hemma",
+      "interval": "1m",
+      "rules": [
+        {
+          "uid": "fg2xm0him1og0b",
+          "title": "myUplink · Aktivt värmepumpslarm",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "datasourceUid": "grafanacloud-prom",
+              "model": {
+                "editorMode": "code",
+                "expr": "myuplink_system_has_alarm{job=\"myuplink\",instance=\"homeassistant\"}",
+                "instant": true,
+                "intervalMs": 1000,
+                "legendFormat": "__auto",
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "expression",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "reducer": {
+                      "params": [],
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ],
+          "noDataState": "KeepLast",
+          "execErrState": "KeepLast",
+          "for": "2m",
+          "annotations": {
+            "description": "Systemets larmflagga har varit aktiv i minst 2 minuter. Kontrollera larmet i myUplink/CTC och loggarna i dashboarden. Larmflaggan gäller hela systemet. Dashboard: /d/ctc-myuplink-overview",
+            "summary": "CTC rapporterar aktivt larm i system {{ $labels.systemID }}"
+          },
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Cloud alerts"
+          }
+        },
+        {
+          "uid": "ag2xm8o1x10xsa",
+          "title": "myUplink · Värmepump offline",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "datasourceUid": "grafanacloud-prom",
+              "model": {
+                "editorMode": "code",
+                "expr": "1 - myuplink_system_device_connected{job=\"myuplink\",instance=\"homeassistant\"}",
+                "instant": true,
+                "intervalMs": 1000,
+                "legendFormat": "__auto",
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "expression",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        0
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "reducer": {
+                      "params": [],
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ],
+          "noDataState": "KeepLast",
+          "execErrState": "KeepLast",
+          "for": "10m",
+          "annotations": {
+            "description": "myUplink rapporterar device som frånkopplad. Kontrollera ström, nätverk och anslutningen i myUplink. Ingen data räknas inte som offline; insamlingsproblem övervakas separat. Dashboard: /d/ctc-myuplink-overview",
+            "summary": "CTC device {{ $labels.deviceID }} har varit offline i 10 minuter"
+          },
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Cloud alerts"
+          }
+        },
+        {
+          "uid": "cg2xmc5rfkhdse",
+          "title": "myUplink · Insamling saknas eller är för gammal",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "datasourceUid": "grafanacloud-prom",
+              "model": {
+                "editorMode": "code",
+                "expr": "max(time() - myuplink_poll_last_success_timestamp_seconds{job=\"myuplink\",instance=\"homeassistant\"}) or vector(600)",
+                "instant": true,
+                "intervalMs": 1000,
+                "legendFormat": "__auto",
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "expression",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "params": [
+                        300
+                      ],
+                      "type": "gt"
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "reducer": {
+                      "params": [],
+                      "type": "last"
+                    },
+                    "type": "query"
+                  }
+                ],
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ],
+          "noDataState": "Alerting",
+          "execErrState": "Alerting",
+          "for": "5m",
+          "annotations": {
+            "description": "Ingen lyckad polling på över 5 minuter, saknad metric eller query-fel under 5 minuter. Kontrollera exporter, API-autentisering, Alloy, nätverk och Grafana Cloud remote_write. Regeln gäller instance homeassistant. Dashboard: /d/ctc-myuplink-overview",
+            "summary": "myUplink: insamlingen saknas, är för gammal eller kan inte läsas"
+          },
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Cloud alerts"
+          }
+        }
+      ]
+    }
+  ]
+}

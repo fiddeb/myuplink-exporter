@@ -6,6 +6,19 @@ import (
 )
 
 type (
+	Alarm struct {
+		ID          string `json:"id"`
+		DeviceID    string `json:"deviceId"`
+		AlarmNumber int    `json:"alarmNumber"`
+		Severity    int    `json:"severity"`
+	}
+
+	ResultAlarms struct {
+		Page          int     `json:"page"`
+		ItemsPerPage  int     `json:"itemsPerPage"`
+		NumItems      int     `json:"numItems"`
+		Notifications []Alarm `json:"notifications"`
+	}
 	ResultSystems struct {
 		Page         int `json:"page"`
 		ItemsPerPage int `json:"itemsPerPage"`
@@ -46,7 +59,7 @@ type (
 		Writable            bool      `json:"writable"`
 		Timestamp           time.Time `json:"timestamp"`
 		Value               *float64  `json:"value"`
-		StrVal              string    `json:"strVal"`
+		StrVal              *string   `json:"strVal"`
 		SmartHomeCategories []string  `json:"smartHomeCategories"`
 		MinValue            float64   `json:"minValue"`
 		MaxValue            float64   `json:"maxValue"`

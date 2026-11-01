@@ -1,3 +1,10 @@
 /myuplink-exporter
 /example
 /release-assets
+
+# Do not send local credentials to the container build context.
+**/.env
+**/.env.*
+**/*.env
+!**/.env.example
+!**/*.env.example
