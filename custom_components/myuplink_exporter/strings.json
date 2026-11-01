@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect myUplink Exporter",
+        "description": "Enter the local exporter URL. Background polling must be enabled. No Grafana or myUplink credentials are stored here.",
+        "data": {
+          "url": "Exporter URL",
+          "max_age": "Maximum snapshot age (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot read a successful, fresh snapshot. Check the URL, background polling and exporter logs."
+    },
+    "abort": {
+      "already_configured": "This exporter is already configured."
+    }
+  }
+}

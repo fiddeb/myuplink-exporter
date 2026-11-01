@@ -15,7 +15,7 @@ import (
 
 func TestProbeMonitoring(t *testing.T) {
 	alarmCalls := 0
-	pointFailure, alarmFailure, systemFailure, cleared, noTimestamp := false, false, false, false, false
+	pointFailure, alarmFailure, systemFailure, cleared, noTimestamp, invalidAlarm := false, false, false, false, false, false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
@@ -29,6 +29,11 @@ func TestProbeMonitoring(t *testing.T) {
 			fmt.Fprintf(w, `{"numItems":1,"systems":[{"systemId":"s","hasAlarm":%t,"devices":[{"id":"offline","connectionState":"Disconnected"},{"id":"bad","connectionState":"Connected"},{"id":"good","connectionState":"Connected"}]}]}`, !cleared)
 		case "/v2/systems/s/notifications/active":
 			alarmCalls++
+			if invalidAlarm {
+				w.Header().Set("Content-Type", "text/html")
+				fmt.Fprint(w, "<html>Maintenance</html>")
+				return
+			}
 			if alarmFailure {
 				w.WriteHeader(http.StatusForbidden)
 				return
@@ -37,7 +42,7 @@ func TestProbeMonitoring(t *testing.T) {
 				fmt.Fprint(w, `{"numItems":0,"notifications":[]}`)
 				return
 			}
-			fmt.Fprint(w, `{"numItems":2,"notifications":[{"deviceId":"good","alarmNumber":42,"severity":1},{"deviceId":"good","alarmNumber":42,"severity":1}]}`)
+			fmt.Fprint(w, `{"numItems":2,"notifications":[{"id":"a","deviceId":"good","alarmNumber":42,"severity":1},{"id":"b","deviceId":"good","alarmNumber":42,"severity":1}]}`)
 		case "/v2/devices/bad/points":
 			if pointFailure {
 				w.WriteHeader(http.StatusForbidden)
@@ -57,9 +62,12 @@ func TestProbeMonitoring(t *testing.T) {
 	}))
 	defer server.Close()
 	previousOpts, previousLogger, previousClient, previousCache := Opts, logger, myuplinkClient, globalCache
+	previousEvents := events
 	t.Cleanup(func() {
 		Opts, logger, myuplinkClient, globalCache = previousOpts, previousLogger, previousClient, previousCache
+		events = previousEvents
 	})
+	events = newEventTracker()
 	Opts.Logger.Level = "error"
 	initLogger()
 	Opts.MyUplink.Device.AllowedConnectionStates = []string{"Connected"}
@@ -111,7 +119,13 @@ func TestProbeMonitoring(t *testing.T) {
 	if strings.Contains(body, "myuplink_system_active_alarms{") {
 		t.Fatal("failed alarm request must not report zero alarms")
 	}
-	alarmFailure, cleared = false, true
+	alarmFailure, invalidAlarm = false, true
+	body = probe()
+	contains(body, "myuplink_probe_success 0")
+	if strings.Contains(body, "myuplink_system_active_alarms{") || len(events.alarms["s"]) != 2 {
+		t.Fatal("invalid alarm response must not report zero or resolve known alarms")
+	}
+	invalidAlarm, cleared = false, true
 	body = probe()
 	contains(body, `myuplink_system_has_alarm{systemID="s"} 0`)
 	contains(body, `myuplink_system_active_alarms{systemID="s"} 0`)
@@ -144,6 +158,79 @@ func TestInvalidProbeParameters(t *testing.T) {
 		myuplinkProbe(recorder, httptest.NewRequest(http.MethodGet, "/probe?cache="+value, nil))
 		if recorder.Code != http.StatusBadRequest {
 			t.Errorf("accepted cache %s", value)
+		}
+	}
+}
+
+func TestEcoZenithUnavailableMeasurements(t *testing.T) {
+	previousTotals := totalParamCache.deviceParamMap
+	totalParamCache.Init()
+	t.Cleanup(func() { totalParamCache.deviceParamMap = previousTotals })
+	value := -32768.0
+	product := "CTC EcoZenith i360"
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/oauth/token":
+			fmt.Fprint(w, `{"access_token":"test","expires_in":3600}`)
+		case "/v2/systems/me":
+			fmt.Fprintf(w, `{"numItems":1,"systems":[{"systemId":"s","devices":[{"id":"d","connectionState":"Connected","product":{"name":%q}}]}]}`, product)
+		case "/v2/devices/d/points":
+			fmt.Fprintf(w, `[{"parameterId":"62015","value":%g,"timestamp":"2026-11-01T07:23:03Z","enumValues":[{"value":"-32768","text":"invalid"}]},{"parameterId":"62027","value":46}]`, value)
+		default:
+			t.Errorf("unexpected API call: %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+	previousOpts, previousLogger, previousClient, previousCache := Opts, logger, myuplinkClient, globalCache
+	t.Cleanup(func() {
+		Opts, logger, myuplinkClient, globalCache = previousOpts, previousLogger, previousClient, previousCache
+	})
+	Opts.Logger.Level = "error"
+	initLogger()
+	Opts.MyUplink.CollectAlarms = false
+	Opts.MyUplink.Device.AllowedConnectionStates = []string{"Connected"}
+	Opts.MyUplink.Device.CalcTotalParameters = []string{"62015"}
+	myuplinkClient = myuplink.NewClient(logger)
+	myuplinkClient.SetApiUrl(server.URL)
+	myuplinkClient.SetAuth("test", "test")
+	if err := myuplinkClient.Connect(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	globalCache = cache.New(time.Minute, 0)
+	probe := func() string {
+		globalCache.Flush()
+		recorder := httptest.NewRecorder()
+		myuplinkProbe(recorder, httptest.NewRequest(http.MethodGet, "/probe", nil))
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("status %d", recorder.Code)
+		}
+		return recorder.Body.String()
+	}
+	for _, v := range []float64{-32768, 36, -32768, 35} {
+		value = v
+		body := probe()
+		if !strings.Contains(body, "myuplink_probe_success 1") || !strings.Contains(body, `parameterID="62027"`) {
+			t.Fatalf("invalid point must not fail collection or suppress other points: %s", body)
+		}
+		present := strings.Contains(body, `parameterID="62015"`)
+		if present != (v != -32768) {
+			t.Fatalf("unexpected measurement availability for %g: %s", v, body)
+		}
+	}
+	// The device-specific sentinel must not suppress legitimate negative values
+	// or the same number in an unrelated product's parameter namespace.
+	Opts.MyUplink.Device.CalcTotalParameters = nil
+	for _, tc := range []struct {
+		product string
+		value   float64
+	}{
+		{"CTC EcoZenith i360", -60}, {"Other product", -32768}, {"CTC EcoZenith i360", 32768},
+	} {
+		product, value = tc.product, tc.value
+		if body := probe(); !strings.Contains(body, `parameterID="62015"`) {
+			t.Fatalf("valid value suppressed: %s", body)
 		}
 	}
 }

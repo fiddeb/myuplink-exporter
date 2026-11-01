@@ -1,7 +1,7 @@
 name: myUplink Cloud telemetry
-version: "0.3.0"
+version: "0.4.2"
 slug: myuplink_cloud
-description: myUplink exporter and Alloy for Grafana Cloud logs and metrics
+description: myUplink exporter for Home Assistant with optional Grafana Cloud telemetry
 url: https://github.com/fiddeb/myuplink-exporter
 arch:
   - aarch64
@@ -10,6 +10,7 @@ startup: application
 boot: auto
 init: false
 options:
+  cloud_enabled: true
   client_id: ""
   client_secret: ""
   loki_url: ""
@@ -23,14 +24,15 @@ options:
   poll_timeout: 55
   request_interval: 3
 schema:
+  cloud_enabled: bool
   client_id: str
   client_secret: password
-  loki_url: url
-  loki_user: str
-  loki_token: password
-  metrics_url: url
-  metrics_user: str
-  metrics_token: password
+  loki_url: str?
+  loki_user: str?
+  loki_token: password?
+  metrics_url: str?
+  metrics_user: str?
+  metrics_token: password?
   instance: str
   poll_interval: int(30,3600)
   poll_timeout: int(10,600)

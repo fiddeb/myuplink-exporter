@@ -1,4 +1,4 @@
-"""Run two supervised processes without host access or a Docker socket."""
+"""Run the exporter and optional Alloy without host access or a Docker socket."""
 import json
 import logging
 from logging.handlers import RotatingFileHandler
@@ -12,12 +12,16 @@ from urllib.parse import urlparse
 
 
 def environment(options):
-    required = ("client_id", "client_secret", "loki_url", "loki_user", "loki_token",
-                "metrics_url", "metrics_user", "metrics_token", "instance")
+    cloud = options.get("cloud_enabled", True)
+    if type(cloud) is not bool:
+        raise ValueError("cloud_enabled must be boolean")
+    required = ("client_id", "client_secret", "instance")
+    if cloud:
+        required += ("loki_url", "loki_user", "loki_token", "metrics_url", "metrics_user", "metrics_token")
     for key in required:
         if not isinstance(options.get(key), str) or not options[key].strip():
             raise ValueError(f"Configure {key} before starting the app")
-    for key in ("loki_url", "metrics_url"):
+    for key in (("loki_url", "metrics_url") if cloud else ()):
         url = urlparse(options[key])
         if url.scheme != "https" or not url.hostname or url.username or url.password:
             raise ValueError(f"{key} must be an HTTPS URL without embedded credentials")
@@ -30,6 +34,8 @@ def environment(options):
         if type(value) is not int or not minimum <= value <= maximum:
             raise ValueError(f"Invalid {key}")
         exporter[f"MYUPLINK_{key.upper()}"] = f"{value}s"
+    if not cloud:
+        return exporter, None
     alloy = os.environ.copy()
     alloy["MYUPLINK_INSTANCE"] = options["instance"]
     for prefix in ("LOKI", "METRICS"):
@@ -45,7 +51,7 @@ def main():
         exporter_env, alloy_env = environment(options)
     except (ValueError, OSError):
         # Never print config or exception text from JSON/URL parsers.
-        print("Invalid app options: fill all credentials and HTTPS endpoints in Configuration", flush=True)
+        print("Invalid app options: check myUplink credentials and enabled Cloud HTTPS endpoints in Configuration", flush=True)
         return 1
     handler = RotatingFileHandler("/data/exporter.jsonl", maxBytes=5*1024*1024,
                                  backupCount=2, encoding="utf-8")
@@ -70,8 +76,9 @@ def main():
                 sys.stdout.flush()
         reader = threading.Thread(target=copy_logs, daemon=True)
         reader.start()
-        children.append(subprocess.Popen(["alloy", "run", "--server.http.listen-addr=127.0.0.1:12345",
-            "--storage.path=/data/alloy", "/etc/myuplink/config.alloy"], env=alloy_env))
+        if alloy_env is not None:
+            children.append(subprocess.Popen(["alloy", "run", "--server.http.listen-addr=127.0.0.1:12345",
+                "--storage.path=/data/alloy", "/etc/myuplink/config.alloy"], env=alloy_env))
         while not stopping.wait(1):
             if any(child.poll() is not None for child in children):
                 print("A telemetry process stopped; restart the app and inspect its logs", flush=True)
