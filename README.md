@@ -377,3 +377,13 @@ device, and missing/stale collection. They are configured separately from the
 Home Assistant apps and dashboard. Adapt the data source, instance and contact
 point before reuse, and test notification delivery. The export uses Grafana
 file-provisioning format, not dashboard JSON or a Prometheus rule file.
+
+### Unavailable CTC measurements
+
+The exporter omits numeric CTC EcoZenith points whose API value is exactly
+`-32768`, observed for unavailable return temperature and hot-water capacity.
+Their enum, calculated-total and measurement-timestamp samples are omitted too.
+Other points continue to be exported; valid readings resume automatically.
+Raw string events remain available for diagnosis. No zero or last-known value
+is substituted. Previously stored samples remain in Prometheus and Home Assistant
+Recorder; select a recent time range when checking the fix.
