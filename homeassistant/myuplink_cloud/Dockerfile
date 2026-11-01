@@ -1,9 +1,8 @@
 FROM golang:1.27.3-bookworm AS exporter
 WORKDIR /src
-# Pin exporter source independently of the local app build context.
-RUN git init && git remote add origin https://github.com/fiddeb/myuplink-exporter.git \
-    && git fetch --depth=1 origin 40c878176aaedce53b6142ec6091e183f74cd075 \
-    && git checkout FETCH_HEAD
+# Generated from the current checkout by scripts/package-homeassistant.sh.
+ADD exporter-source.tar ./
+RUN go test ./...
 RUN CGO_ENABLED=0 go build -trimpath -o /myuplink-exporter .
 
 FROM grafana/alloy:v1.21.3 AS alloy
