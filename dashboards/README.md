@@ -104,6 +104,12 @@ Prometheus and Loki may have different retention even on the same dashboard.
 
 ## Interpretation
 
+Space heating also shows the reported heating-curve slope (`61513`) and
+adjustment (`61517`). These settings do not reconstruct the complete effective
+curve, which can include additional control corrections. The heat-pump section
+shows reported compressor runtime over the last 24 hours (`62234`), converted
+from minutes to hours. This rolling value is not a cumulative counter.
+
 Parameter IDs were checked against the supplied live CTC sample. Meaning and
 units retain myUplink v2 semantics and need comparison with your CTC display:
 

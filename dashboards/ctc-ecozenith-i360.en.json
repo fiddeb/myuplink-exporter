@@ -3075,7 +3075,7 @@
                 },
                 "text": {
                   "mode": "fixed",
-                  "fixed": "Electric power"
+                  "fixed": "Auxiliary power"
                 }
               },
               "placement": {
@@ -3814,12 +3814,140 @@
       }
     },
     {
+      "id": 510,
+      "title": "Heating curve · slope",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 39,
+        "w": 12,
+        "h": 4
+      },
+      "description": "Reported curve slope setting; not a temperature measured by the outdoor sensor.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61513\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 511,
+      "title": "Heating curve · adjustment",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 39,
+        "w": 12,
+        "h": 4
+      },
+      "description": "Reported curve adjustment setting. Slope and adjustment alone do not describe every control correction.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"61517\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
       "id": 12,
       "title": "Heating circuit · flow and return",
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 39,
+        "y": 43,
         "w": 14,
         "h": 8
       },
@@ -3925,7 +4053,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 14,
-        "y": 39,
+        "y": 43,
         "w": 10,
         "h": 8
       },
@@ -4019,7 +4147,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 47,
+        "y": 51,
         "w": 24,
         "h": 7
       },
@@ -4139,7 +4267,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 54,
+        "y": 58,
         "w": 24,
         "h": 1
       }
@@ -4150,7 +4278,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 55,
+        "y": 59,
         "w": 12,
         "h": 4
       },
@@ -4214,7 +4342,7 @@
       "type": "gauge",
       "gridPos": {
         "x": 12,
-        "y": 55,
+        "y": 59,
         "w": 12,
         "h": 4
       },
@@ -4278,7 +4406,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 59,
+        "y": 63,
         "w": 24,
         "h": 8
       },
@@ -4388,7 +4516,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 67,
+        "y": 71,
         "w": 24,
         "h": 6
       },
@@ -4425,9 +4553,73 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 73,
+        "y": 77,
         "w": 24,
         "h": 1
+      }
+    },
+    {
+      "id": 512,
+      "title": "Compressor runtime · last 24 h",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 78,
+        "w": 24,
+        "h": 3
+      },
+      "description": "Reported rolling 24-hour runtime, converted from minutes to hours. This is not a cumulative counter; do not apply rate/increase.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62234\"} / 60",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:h",
+          "decimals": 1,
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
       }
     },
     {
@@ -4436,7 +4628,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 74,
+        "y": 81,
         "w": 6,
         "h": 6
       },
@@ -4500,7 +4692,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 6,
-        "y": 74,
+        "y": 81,
         "w": 18,
         "h": 6
       },
@@ -4582,7 +4774,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 80,
+        "y": 87,
         "w": 12,
         "h": 8
       },
@@ -4713,7 +4905,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 80,
+        "y": 87,
         "w": 12,
         "h": 8
       },
@@ -4807,7 +4999,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 88,
+        "y": 95,
         "w": 12,
         "h": 8
       },
@@ -4901,7 +5093,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 88,
+        "y": 95,
         "w": 12,
         "h": 8
       },
@@ -4997,7 +5189,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 96,
+        "y": 103,
         "w": 24,
         "h": 1
       }
@@ -5008,7 +5200,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 97,
+        "y": 104,
         "w": 8,
         "h": 4
       },
@@ -5076,7 +5268,7 @@
       "type": "stat",
       "gridPos": {
         "x": 8,
-        "y": 97,
+        "y": 104,
         "w": 8,
         "h": 4
       },
@@ -5157,7 +5349,7 @@
       "type": "stat",
       "gridPos": {
         "x": 16,
-        "y": 97,
+        "y": 104,
         "w": 8,
         "h": 4
       },
@@ -5233,7 +5425,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 101,
+        "y": 108,
         "w": 24,
         "h": 7
       },
@@ -5272,7 +5464,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 108,
+        "y": 115,
         "w": 24,
         "h": 7
       },
@@ -5307,7 +5499,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 115,
+        "y": 122,
         "w": 12,
         "h": 7
       },
@@ -5391,7 +5583,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 115,
+        "y": 122,
         "w": 12,
         "h": 7
       },
@@ -5473,7 +5665,7 @@
       "type": "text",
       "gridPos": {
         "x": 0,
-        "y": 122,
+        "y": 129,
         "w": 24,
         "h": 6
       },
