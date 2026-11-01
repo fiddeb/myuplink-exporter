@@ -14,6 +14,35 @@ Keep both language variants in sync when changing panels or queries.
 
 # Dashboard layouts
 
+## Canvas system overview
+
+The overview includes a native Canvas panel with an outdoor unit, EcoZenith tank,
+and house. Fifteen instant queries reuse the existing point selectors: outdoor
+temperature, pump inlet/outlet, tank temperature, hot-water capacity, heating
+flow/return/setpoint, compressor RPS, charge-pump percentage, two separate
+electrical-power readings, indoor temperature, room setpoint, and degree minutes. No additional myUplink API calls
+are triggered: Grafana queries the existing Prometheus samples.
+
+The fan is blue when reported compressor speed is positive and gray at zero.
+It does not animate or represent measured water flow. Pipes are schematic:
+amber denotes supply and blue denotes return, not health. Tank capacity is the
+reported percentage, not a measured physical water level. The two electrical
+power readings are not summed. Missing values display as an em dash; existing
+values may still be stale, so check collection health above the Canvas.
+
+Click readings or the links below each component for details. Dynamic versions
+link to the relevant tab; classic versions open the corresponding detail panel.
+Links preserve the selected variables and time range. Canvas uses native shapes
+and metric fields, with no remote image dependencies or control/API actions.
+Zoom-to-content fits the drawing to the available panel size; the full diagram
+is easiest to read on a desktop or tablet. Pan/zoom is enabled for closer viewing.
+
+To update the bilingual Canvas consistently, edit `scripts/build_canvas.py` and
+run `python scripts/build_canvas.py` from the repository. It updates panel 500
+in all four dashboard files and the overview layout. It leaves data-source
+variables and other detail panels intact. Test against your Grafana version:
+the live Canvas was checked in Grafana Cloud 13.3, including actual metric values.
+
 ## Colors
 
 Ordinary stat values use neutral theme text (white in dark mode). Hot-water
@@ -82,7 +111,8 @@ units retain myUplink v2 semantics and need comparison with your CTC display:
 - 61590/61591 are not interpreted as instantaneous power consumption.
 - 62168/62361 are shown separately, not added together.
 - No COP or energy integration is invented from incomplete data.
-- 62203 is labeled by its generic API name, not assumed to be a physical room sensor.
+- 62203 is indoor temperature and 61509 the room setpoint, confirmed by the owner
+  for this installation. Verify this mapping on other installations.
 - Active enum text is shown only when API enum mappings are available.
 - System alarm panels cover the entire selected system, not only the chosen device.
 - API collection/last-success panels cover the entire instance.
