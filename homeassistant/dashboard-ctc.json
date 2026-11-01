@@ -73,6 +73,36 @@
               }
             },
             {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity": "sensor.ctc_ecozenith_i360_return_flow",
+                  "state": "unavailable"
+                }
+              ],
+              "card": {
+                "type": "entities",
+                "title": "Retur saknas · tidigare mätning",
+                "show_header_toggle": false,
+                "entities": [
+                  {
+                    "entity": "sensor.ctc_ecozenith_i360_return_last_valid",
+                    "name": "Senast giltig retur"
+                  },
+                  {
+                    "entity": "sensor.ctc_ecozenith_i360_return_last_valid_timestamp",
+                    "name": "Mätningens ålder",
+                    "format": "relative"
+                  }
+                ]
+              },
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
               "type": "history-graph",
               "title": "Rumstemperatur · 12 timmar",
               "hours_to_show": 12,

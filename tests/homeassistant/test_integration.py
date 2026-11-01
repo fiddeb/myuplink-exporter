@@ -91,3 +91,41 @@ async def test_config_flow_validates_endpoint_and_rejects_stale(tmp_path):
         await flow.async_step_user({'url': 'http://exporter:8080', 'max_age': 300})
         assert form.call_args.kwargs['errors'] == {'base': 'cannot_connect'}
     await hass.async_stop()
+
+@pytest.mark.asyncio
+async def test_last_valid_return_is_separate_and_keeps_timestamp(tmp_path):
+    from copy import deepcopy
+    from datetime import datetime, timezone
+    hass = HomeAssistant(str(tmp_path))
+    coordinator = ExporterCoordinator(hass, make_entry())
+    key = ('s', 'd', '62015')
+    snapshot = dict(devices={('s', 'd'): {'deviceName': 'CTC EcoZenith i360'}},
+                    values={key: dict(value=36, name='Return flow', unit='°C', binary=False),
+                            ('s', 'd', 'connected'): dict(value=True, binary=True)},
+                    timestamps={key: 950}, observed_at=1000)
+    async def refresh(data):
+        with patch('custom_components.myuplink_exporter.coordinator.fetch_snapshot', new=AsyncMock(return_value=deepcopy(data))):
+            await coordinator.async_refresh()
+    await refresh(snapshot)
+    saved_key = ('s', 'd', 'return_last_valid')
+    stamp_key = ('s', 'd', 'return_last_valid_timestamp')
+    current = PointSensor(coordinator, key, snapshot['values'][key])
+    saved = PointSensor(coordinator, saved_key, coordinator.data['values'][saved_key])
+    stamp = PointSensor(coordinator, stamp_key, coordinator.data['values'][stamp_key])
+    assert saved.native_value == 36 and saved.state_class is None
+    assert stamp.device_class == 'timestamp'
+    assert stamp.native_value == datetime.fromtimestamp(950, timezone.utc)
+    del snapshot['values'][key]
+    snapshot['observed_at'] = 1100
+    await refresh(snapshot)
+    assert not current.available and saved.available and saved.native_value == 36
+    assert stamp.native_value.timestamp() == 950
+    with patch('custom_components.myuplink_exporter.coordinator.fetch_snapshot', new=AsyncMock(side_effect=ValueError('stale'))):
+        await coordinator.async_refresh()
+    assert not current.available and saved.available
+    snapshot['values'][key] = dict(value=35, name='Return flow', unit='°C', binary=False)
+    snapshot['timestamps'][key] = 1150
+    await refresh(snapshot)
+    assert current.available and saved.native_value == 35 and stamp.native_value.timestamp() == 1150
+    await coordinator.async_shutdown()
+    await hass.async_stop()

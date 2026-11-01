@@ -24,8 +24,8 @@ class PointSensor(ExporterEntity, SensorEntity):
 
     @property
     def device_class(self):
-        return UNITS.get(self.native_unit_of_measurement)
+        return self.point.get("device_class") or UNITS.get(self.native_unit_of_measurement)
 
     @property
     def state_class(self):
-        return SensorStateClass.MEASUREMENT if self.device_class else None
+        return SensorStateClass.MEASUREMENT if self.device_class and not self.point.get("historical") else None

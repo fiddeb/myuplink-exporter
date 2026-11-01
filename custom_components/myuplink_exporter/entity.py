@@ -40,6 +40,8 @@ class ExporterEntity(CoordinatorEntity):
 
     @property
     def available(self):
+        if self.point.get("historical"):
+            return True
         if not super().available or self.key not in self.coordinator.data["values"]:
             return False
         connected = self.coordinator.data["values"].get((*self.key[:2], "connected"))

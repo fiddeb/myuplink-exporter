@@ -113,3 +113,13 @@ Home Assistant Recorder, not the separate Prometheus database.
 Integration 0.1.2 ignores CTC EcoZenith numeric values of -32768 observed during
 mode transitions; existing entities become unavailable until valid values
 return. It does not remove invalid samples already stored in Recorder.
+
+### Last valid return temperature (integration 0.1.3)
+
+For CTC EcoZenith, two separate entities retain the last valid return temperature
+and its source timestamp. The overview displays these when current return is
+unavailable. Historical entities have no measurement state class and do not
+replace the current sensor or exporter metrics. The timestamp uses the source
+measurement time, falling back to the exporter's successful poll time when absent.
+Values are retained in memory across missing points and connection failures,
+but reset on integration reload/Home Assistant restart until a valid reading arrives.
