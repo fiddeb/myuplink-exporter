@@ -63,7 +63,13 @@ func TestQueuedRequestCancellation(t *testing.T) {
 	defer cancel()
 	second, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://example/second", nil)
 	result := make(chan error, 1)
-	go func() { _, err := gate.RoundTrip(second); result <- err }()
+	go func() {
+		resp, err := gate.RoundTrip(second)
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
+		result <- err
+	}()
 	select {
 	case err := <-result:
 		if !errors.Is(err, context.DeadlineExceeded) {
