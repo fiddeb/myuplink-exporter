@@ -1,0 +1,1 @@
+DOMAIN = "myuplink_exporter"

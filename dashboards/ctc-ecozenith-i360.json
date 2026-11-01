@@ -15,7 +15,7 @@
   "graphTooltip": 1,
   "refresh": "1m",
   "time": {
-    "from": "now-24h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {},
@@ -123,300 +123,10 @@
       }
     },
     {
-      "id": 2,
-      "title": "Anslutning",
-      "type": "stat",
-      "gridPos": {
-        "x": 0,
-        "y": 1,
-        "w": 6,
-        "h": 4
-      },
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "myuplink_system_device_connected{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\"}",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "Ingen data",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "Offline",
-                  "color": "red",
-                  "index": 0
-                },
-                "1": {
-                  "text": "Online",
-                  "color": "green",
-                  "index": 1
-                }
-              }
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto"
-      }
-    },
-    {
-      "id": 3,
-      "title": "Larm i systemet",
-      "type": "stat",
-      "gridPos": {
-        "x": 6,
-        "y": 1,
-        "w": 6,
-        "h": 4
-      },
-      "description": "Systemnivå: kan omfatta fler devices än den valda.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "myuplink_system_has_alarm{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\"}",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "Ingen data",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "Inga larm",
-                  "color": "green",
-                  "index": 0
-                },
-                "1": {
-                  "text": "Aktivt larm",
-                  "color": "red",
-                  "index": 1
-                }
-              }
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto"
-      }
-    },
-    {
-      "id": 8,
-      "title": "Värmepump · driftläge",
-      "type": "stat",
-      "gridPos": {
-        "x": 12,
-        "y": 1,
-        "w": 6,
-        "h": 4
-      },
-      "description": "Visar API:ts enum-text för aktivt värde. Saknad enum ger Ingen data, inte ett antaget driftläge.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62017\"} == 1",
-          "legendFormat": "{{valueText}}",
-          "instant": true,
-          "range": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 1,
-          "noValue": "Ingen data",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "name",
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto"
-      }
-    },
-    {
-      "id": 9,
-      "title": "System · driftläge",
-      "type": "stat",
-      "gridPos": {
-        "x": 18,
-        "y": 1,
-        "w": 6,
-        "h": 4
-      },
-      "description": "Visar API:ts enum-text för aktivt värde. Saknad enum ger Ingen data, inte ett antaget driftläge.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62005\"} == 1",
-          "legendFormat": "{{valueText}}",
-          "instant": true,
-          "range": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 1,
-          "noValue": "Ingen data",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "name",
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto"
-      }
-    },
-    {
       "id": 500,
       "title": "Systembild · värmepump, varmvatten och hus",
       "type": "canvas",
-      "pluginVersion": "13.3.0",
+      "pluginVersion": "13.3.1",
       "description": "Schematisk systembild, inte ett verifierat hydraulschema. Värden är senaste rapporterade API-värden och kan vara gamla vid insamlingsfel. Saknade data visas som —. Klicka på mätvärden eller detaljlänkar för rätt flik. Electric power och Immersion heater visas separat; de summeras inte.",
       "datasource": {
         "type": "prometheus",
@@ -612,7 +322,19 @@
           },
           "decimals": 1,
           "noValue": "—",
-          "mappings": []
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
         },
         "overrides": [
           {
@@ -994,6 +716,15 @@
           "disableForOneClick": false
         },
         "root": {
+          "border": {
+            "color": {
+              "fixed": "dark-green"
+            }
+          },
+          "constraint": {
+            "horizontal": "left",
+            "vertical": "top"
+          },
           "name": "Heat pump system",
           "type": "frame",
           "placement": {
@@ -3471,7 +3202,7 @@
                 },
                 "text": {
                   "mode": "fixed",
-                  "fixed": "Schematisk koppling · linjer visar inte uppmätt flöde · kontrollera insamlingsstatus ovan"
+                  "fixed": "Schematisk koppling · linjer visar inte uppmätt flöde · kontrollera insamlingsstatus"
                 }
               },
               "placement": {
@@ -3502,9 +3233,307 @@
       },
       "gridPos": {
         "x": 0,
+        "y": 1,
+        "w": 15,
+        "h": 16
+      }
+    },
+    {
+      "id": 9,
+      "title": "System · driftläge",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 1,
+        "w": 9,
+        "h": 4
+      },
+      "description": "Visar API:ts enum-text för aktivt värde. Saknad enum ger Ingen data, inte ett antaget driftläge.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62005\"} == 1",
+          "legendFormat": "{{valueText}}",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Ingen data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Anslutning",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
         "y": 5,
-        "w": 24,
-        "h": 15
+        "w": 9,
+        "h": 4
+      },
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_connected{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "Ingen data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Offline",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Online",
+                  "color": "#ffffff",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Larm i systemet",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 9,
+        "w": 9,
+        "h": 4
+      },
+      "description": "Systemnivå: kan omfatta fler devices än den valda.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_has_alarm{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\"}",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "Ingen data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Inga larm",
+                  "color": "#ffffff",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Aktivt larm",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 401,
+      "title": "Tid sedan lyckad polling",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 13,
+        "w": 9,
+        "h": 4
+      },
+      "description": "Exporterhälsa på instance-nivå. Över 5 minuter visas rött; justera för ditt pollintervall.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min(time() - myuplink_poll_last_success_timestamp_seconds{job=\"myuplink\",instance=~\"$instance\"}, 0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 1,
+          "noValue": "Ingen data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#ffffff",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 180
+              },
+              {
+                "color": "red",
+                "value": 300
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
       }
     },
     {
@@ -3517,9 +3546,9 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 20,
+        "y": 17,
         "w": 24,
-        "h": 7
+        "h": 6
       },
       "targets": [
         {
@@ -3643,9 +3672,9 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 27,
+        "y": 23,
         "w": 24,
-        "h": 7
+        "h": 8
       },
       "targets": [
         {
@@ -3680,7 +3709,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 34,
+        "y": 31,
         "w": 24,
         "h": 1
       }
@@ -3691,7 +3720,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 35,
+        "y": 32,
         "w": 12,
         "h": 4
       },
@@ -3755,7 +3784,7 @@
       "type": "stat",
       "gridPos": {
         "x": 12,
-        "y": 35,
+        "y": 32,
         "w": 12,
         "h": 4
       },
@@ -3819,7 +3848,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 39,
+        "y": 36,
         "w": 12,
         "h": 4
       },
@@ -3883,7 +3912,7 @@
       "type": "stat",
       "gridPos": {
         "x": 12,
-        "y": 39,
+        "y": 36,
         "w": 12,
         "h": 4
       },
@@ -3947,7 +3976,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 43,
+        "y": 40,
         "w": 14,
         "h": 8
       },
@@ -4053,7 +4082,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 14,
-        "y": 43,
+        "y": 40,
         "w": 10,
         "h": 8
       },
@@ -4147,7 +4176,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 51,
+        "y": 48,
         "w": 24,
         "h": 7
       },
@@ -4267,7 +4296,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 58,
+        "y": 55,
         "w": 24,
         "h": 1
       }
@@ -4278,7 +4307,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 59,
+        "y": 56,
         "w": 12,
         "h": 4
       },
@@ -4342,7 +4371,7 @@
       "type": "gauge",
       "gridPos": {
         "x": 12,
-        "y": 59,
+        "y": 56,
         "w": 12,
         "h": 4
       },
@@ -4406,7 +4435,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 63,
+        "y": 60,
         "w": 24,
         "h": 8
       },
@@ -4516,7 +4545,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 71,
+        "y": 68,
         "w": 24,
         "h": 6
       },
@@ -4553,9 +4582,73 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 77,
+        "y": 74,
         "w": 24,
         "h": 1
+      }
+    },
+    {
+      "id": 8,
+      "title": "Värmepump · driftläge",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 75,
+        "w": 12,
+        "h": 3
+      },
+      "description": "Visar API:ts enum-text för aktivt värde. Saknad enum ger Ingen data, inte ett antaget driftläge.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "myuplink_system_device_point_enum{job=\"myuplink\",instance=~\"$instance\",systemID=~\"$system\",deviceID=~\"$device\",parameterID=\"62017\"} == 1",
+          "legendFormat": "{{valueText}}",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Ingen data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
       }
     },
     {
@@ -4563,9 +4656,9 @@
       "title": "Kompressordrift · senaste 24 h",
       "type": "stat",
       "gridPos": {
-        "x": 0,
-        "y": 78,
-        "w": 24,
+        "x": 12,
+        "y": 75,
+        "w": 12,
         "h": 3
       },
       "description": "Rapporterad drifttid senaste 24 timmar, omräknad från minuter till timmar. Inte en kumulativ counter; använd inte rate/increase.",
@@ -4628,7 +4721,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 81,
+        "y": 78,
         "w": 6,
         "h": 6
       },
@@ -4692,7 +4785,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 6,
-        "y": 81,
+        "y": 78,
         "w": 18,
         "h": 6
       },
@@ -4774,7 +4867,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 87,
+        "y": 84,
         "w": 12,
         "h": 8
       },
@@ -4905,7 +4998,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 87,
+        "y": 84,
         "w": 12,
         "h": 8
       },
@@ -4999,7 +5092,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 95,
+        "y": 92,
         "w": 12,
         "h": 8
       },
@@ -5093,7 +5186,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 95,
+        "y": 92,
         "w": 12,
         "h": 8
       },
@@ -5189,7 +5282,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 103,
+        "y": 100,
         "w": 24,
         "h": 1
       }
@@ -5200,7 +5293,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 104,
+        "y": 101,
         "w": 8,
         "h": 4
       },
@@ -5268,7 +5361,7 @@
       "type": "stat",
       "gridPos": {
         "x": 8,
-        "y": 104,
+        "y": 101,
         "w": 8,
         "h": 4
       },
@@ -5349,7 +5442,7 @@
       "type": "stat",
       "gridPos": {
         "x": 16,
-        "y": 104,
+        "y": 101,
         "w": 8,
         "h": 4
       },
@@ -5425,7 +5518,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 108,
+        "y": 105,
         "w": 24,
         "h": 7
       },
@@ -5464,7 +5557,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 115,
+        "y": 112,
         "w": 24,
         "h": 7
       },
@@ -5499,7 +5592,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 122,
+        "y": 119,
         "w": 12,
         "h": 7
       },
@@ -5583,7 +5676,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 122,
+        "y": 119,
         "w": 12,
         "h": 7
       },
@@ -5665,7 +5758,7 @@
       "type": "text",
       "gridPos": {
         "x": 0,
-        "y": 129,
+        "y": 126,
         "w": 24,
         "h": 6
       },

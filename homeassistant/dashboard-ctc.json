@@ -1,0 +1,860 @@
+{
+  "title": "Värmepump",
+  "views": [
+    {
+      "title": "Översikt",
+      "path": "oversikt",
+      "type": "sections",
+      "max_columns": 3,
+      "sections": [
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Huset",
+              "icon": "mdi:home-thermometer",
+              "heading_style": "title"
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_temperature",
+              "name": "Inomhus",
+              "icon": "mdi:home-thermometer-outline",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_outdoor_temperature",
+              "name": "Utomhus",
+              "icon": "mdi:thermometer",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_primary_flow_temp",
+              "name": "Framledning",
+              "icon": "mdi:radiator",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_return_flow",
+              "name": "Retur",
+              "icon": "mdi:thermometer-chevron-down",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity": "sensor.ctc_ecozenith_i360_return_flow",
+                  "state": "unavailable"
+                }
+              ],
+              "card": {
+                "type": "entities",
+                "title": "Retur saknas · tidigare mätning",
+                "show_header_toggle": false,
+                "entities": [
+                  {
+                    "entity": "sensor.ctc_ecozenith_i360_return_last_valid",
+                    "name": "Senast giltig retur"
+                  },
+                  {
+                    "entity": "sensor.ctc_ecozenith_i360_return_last_valid_timestamp",
+                    "name": "Mätningens ålder",
+                    "format": "relative"
+                  }
+                ]
+              },
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Rumstemperatur · 12 timmar",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_temperature",
+                  "name": "Inomhus"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_temp_room",
+                  "name": "Önskad temperatur"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Varmvatten",
+              "icon": "mdi:water-boiler",
+              "heading_style": "title"
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_hot_water_tank_temp",
+              "name": "Tanktemperatur",
+              "icon": "mdi:water-thermometer",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_hot_water_capacity",
+              "name": "Kapacitet",
+              "icon": "mdi:water-percent",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_hot_water_setpoint",
+              "name": "Börvärde",
+              "icon": "mdi:thermometer-check",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_hot_water_mode",
+              "name": "Varmvattenläge",
+              "icon": "mdi:water-boiler",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Varmvatten · 12 timmar",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_tank_temp",
+                  "name": "Tank"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_setpoint",
+                  "name": "Börvärde"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Drift just nu",
+              "icon": "mdi:heat-pump",
+              "heading_style": "title"
+            },
+            {
+              "type": "tile",
+              "entity": "binary_sensor.ctc_ecozenith_i360_compressor_running",
+              "name": "Kompressor",
+              "icon": "mdi:heat-pump",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_rps",
+              "name": "Kompressor · rps",
+              "icon": "mdi:speedometer",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_status",
+              "name": "Systemläge",
+              "icon": "mdi:home-switch",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_auxiliary_heater_power",
+              "name": "Tillsats · eleffekt",
+              "icon": "mdi:lightning-bolt",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Kompressordrift · 12 timmar",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "binary_sensor.ctc_ecozenith_i360_compressor_running",
+                  "name": "Kompressor"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "entity": "binary_sensor.myuplink_system_active_alarm",
+                  "state": "on"
+                }
+              ],
+              "card": {
+                "type": "markdown",
+                "content": "## Aktivt larm\nVärmepumpen rapporterar ett larm. Kontrollera myUplink eller pumpens display."
+              }
+            },
+            {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "entity": "binary_sensor.ctc_ecozenith_i360_connected",
+                  "state_not": "on"
+                }
+              ],
+              "card": {
+                "type": "markdown",
+                "content": "## Kontrollera anslutningen\nVärmepumpen är frånkopplad eller aktuell data saknas. Kontrollera exporterns logg."
+              }
+            }
+          ]
+        }
+      ],
+      "header": {
+        "card": {
+          "type": "markdown",
+          "content": "# CTC EcoZenith i360\nVärme och varmvatten"
+        },
+        "layout": "responsive",
+        "badges_position": "bottom",
+        "badges_wrap": "wrap"
+      },
+      "badges": [
+        {
+          "type": "entity",
+          "entity": "binary_sensor.ctc_ecozenith_i360_connected",
+          "name": "Anslutning",
+          "show_name": true,
+          "show_state": true,
+          "color": "green"
+        },
+        {
+          "type": "entity",
+          "entity": "binary_sensor.myuplink_system_active_alarm",
+          "name": "Larm",
+          "show_name": true,
+          "show_state": true,
+          "color": "red"
+        }
+      ]
+    },
+    {
+      "title": "Husvärme",
+      "path": "husvarme",
+      "type": "sections",
+      "max_columns": 2,
+      "sections": [
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Temperaturer",
+              "icon": "mdi:home-thermometer",
+              "heading_style": "title"
+            },
+            {
+              "type": "entities",
+              "title": "Husets temperaturer",
+              "show_header_toggle": false,
+              "state_color": false,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_temperature",
+                  "name": "Inomhus"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_temp_room",
+                  "name": "Önskad rumstemperatur"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_outdoor_temperature",
+                  "name": "Utomhus"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_primary_flow_temp",
+                  "name": "Framledning"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_primary_flow_setpoint",
+                  "name": "Framledning · börvärde"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_return_flow",
+                  "name": "Retur"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Framledning och retur",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_primary_flow_temp",
+                  "name": "Framledning"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_primary_flow_setpoint",
+                  "name": "Börvärde"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_return_flow",
+                  "name": "Retur"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Värmebehov och kurva",
+              "icon": "mdi:chart-bell-curve-cumulative",
+              "heading_style": "title"
+            },
+            {
+              "type": "entities",
+              "title": "Reglering",
+              "show_header_toggle": false,
+              "state_color": false,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_degree_minute",
+                  "name": "Gradminuter"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_start_at_degree_minute",
+                  "name": "Startgräns · gradminuter"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_inclination",
+                  "name": "Kurvlutning"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_adjustment",
+                  "name": "Kurvjustering"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_program",
+                  "name": "Värmeprogram"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Gradminuter",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_degree_minute",
+                  "name": "Gradminuter"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_start_at_degree_minute",
+                  "name": "Startgräns"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "markdown",
+              "content": "**Kurvlutning** styr hur framledningens börvärde ökar när det blir kallare ute. **Kurvjustering** flyttar kurvan uppåt eller nedåt. Värdena här är endast avläsningar."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Varmvatten",
+      "path": "varmvatten",
+      "type": "sections",
+      "max_columns": 2,
+      "sections": [
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Temperatur och kapacitet",
+              "icon": "mdi:water-thermometer",
+              "heading_style": "title"
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_hot_water_tank_temp",
+              "name": "Tanktemperatur",
+              "icon": "mdi:water-thermometer",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ctc_ecozenith_i360_hot_water_capacity",
+              "name": "Kapacitet",
+              "icon": "mdi:water-percent",
+              "color": "grey",
+              "tap_action": {
+                "action": "more-info"
+              },
+              "grid_options": {
+                "columns": 6,
+                "rows": 1
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Tank och börvärde",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_tank_temp",
+                  "name": "Tank"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_setpoint",
+                  "name": "Börvärde"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Varmvattenkapacitet",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_capacity",
+                  "name": "Kapacitet"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Inställningar och läge",
+              "icon": "mdi:tune",
+              "heading_style": "title"
+            },
+            {
+              "type": "entities",
+              "title": "Varmvatten",
+              "show_header_toggle": false,
+              "state_color": false,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_mode",
+                  "name": "Läge"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_setpoint",
+                  "name": "Börvärde"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_extra_dhw",
+                  "name": "Extra varmvatten · tid"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_status",
+                  "name": "Systemläge"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Driftläge",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_status",
+                  "name": "Systemläge"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hot_water_mode",
+                  "name": "Varmvattenläge"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "markdown",
+              "content": "**DHW** = varmvatten. **HC** = husvärme. **DHW/HC** = kombinerat läge. Kapaciteten är pumpens rapporterade procentvärde, inte en uppmätt vattennivå."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Värmepump",
+      "path": "varmepump",
+      "type": "sections",
+      "max_columns": 3,
+      "sections": [
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Kompressor och cirkulation",
+              "icon": "mdi:heat-pump",
+              "heading_style": "title"
+            },
+            {
+              "type": "entities",
+              "title": "Drift",
+              "show_header_toggle": false,
+              "state_color": false,
+              "entities": [
+                {
+                  "entity": "binary_sensor.ctc_ecozenith_i360_compressor_running",
+                  "name": "Kompressor igång"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_rps",
+                  "name": "Kompressorvarvtal · rps"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_charge_pump",
+                  "name": "Laddpump"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_operation_time_24h_hp1",
+                  "name": "Drifttid senaste 24 h · minuter"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_operation_time_hp1",
+                  "name": "Drifttid totalt"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Kompressorvarvtal",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_rps",
+                  "name": "Kompressor · rps"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Laddpump",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_charge_pump",
+                  "name": "Laddpump"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Temperaturer och tillsats",
+              "icon": "mdi:thermometer-lines",
+              "heading_style": "title"
+            },
+            {
+              "type": "entities",
+              "title": "Värmepump",
+              "show_header_toggle": false,
+              "state_color": false,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hp_out",
+                  "name": "Värmepump ut"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_hp_in",
+                  "name": "Värmepump in"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_discharge_gas_temp",
+                  "name": "Hetgas"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_suction_gas_temp",
+                  "name": "Suggas"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_high_pressure",
+                  "name": "Högtryck"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_low_pressure",
+                  "name": "Lågtryck"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Tillsatsens eleffekt",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_auxiliary_heater_power",
+                  "name": "Tillsats"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_immersion_heater_power",
+                  "name": "Elpatron"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "markdown",
+              "content": "Tillsats och elpatron visas separat och summeras inte. De visar **inte värmepumpens totala effektuttag**."
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Status och händelser",
+              "icon": "mdi:clipboard-pulse",
+              "heading_style": "title"
+            },
+            {
+              "type": "entities",
+              "title": "Anslutning och larm",
+              "show_header_toggle": false,
+              "state_color": false,
+              "entities": [
+                {
+                  "entity": "binary_sensor.ctc_ecozenith_i360_connected",
+                  "name": "Anslutning"
+                },
+                {
+                  "entity": "binary_sensor.myuplink_system_active_alarm",
+                  "name": "Aktivt larm"
+                },
+                {
+                  "entity": "sensor.ctc_ecozenith_i360_status",
+                  "name": "Systemläge"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "history-graph",
+              "title": "Status över tid",
+              "hours_to_show": 12,
+              "entities": [
+                {
+                  "entity": "binary_sensor.ctc_ecozenith_i360_connected",
+                  "name": "Anslutning"
+                },
+                {
+                  "entity": "binary_sensor.myuplink_system_active_alarm",
+                  "name": "Larm"
+                },
+                {
+                  "entity": "binary_sensor.ctc_ecozenith_i360_compressor_running",
+                  "name": "Kompressor"
+                }
+              ],
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "logbook",
+              "title": "Drifthändelser",
+              "hours_to_show": 24,
+              "entities": [
+                "binary_sensor.ctc_ecozenith_i360_compressor_running",
+                "binary_sensor.myuplink_system_active_alarm",
+                "sensor.ctc_ecozenith_i360_status"
+              ]
+            },
+            {
+              "type": "markdown",
+              "content": "Historiken och händelserna här kommer från Home Assistant. Prometheus lagrar separat; dess retention ändrar inte Home Assistants historik.\n\n[Öppna Prometheus](http://homeassistant.local:9090)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

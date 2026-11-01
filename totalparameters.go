@@ -10,7 +10,7 @@ import (
 
 type (
 	TotalParameterCache struct {
-		lock           sync.RWMutex
+		lock           sync.Mutex
 		deviceParamMap map[string]*TotalParameterMetric
 	}
 
@@ -25,6 +25,8 @@ var (
 )
 
 func (c *TotalParameterCache) Init() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.deviceParamMap = map[string]*TotalParameterMetric{}
 }
 
@@ -35,25 +37,21 @@ func (c *TotalParameterCache) getParameterValue(deviceID string, parameterID str
 		parameterID,
 	)
 
-	// exists check (eg. new parameter)
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	// Lookup and timestamp deduplication must be atomic across concurrent probes.
 	if _, exists := c.deviceParamMap[key]; !exists {
-		c.lock.Lock()
 		c.deviceParamMap[key] = &TotalParameterMetric{
 			updated: devicePoint.Timestamp,
 			value:   *devicePoint.Value,
 		}
-		c.lock.Unlock()
 	}
 
 	// increase check
 	if c.deviceParamMap[key].updated != devicePoint.Timestamp {
-		c.lock.Lock()
 		c.deviceParamMap[key].updated = devicePoint.Timestamp
 		c.deviceParamMap[key].value += *devicePoint.Value
-		c.lock.Unlock()
 	}
 
-	c.lock.RLock()
-	defer c.lock.RUnlock()
 	return c.deviceParamMap[key].value
 }

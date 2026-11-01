@@ -12,9 +12,9 @@ history already deleted in Cloud.
 In Advanced SSH & Web Terminal:
 
 ```sh
-git clone --branch improve-monitoring --single-branch https://github.com/fiddeb/myuplink-exporter.git /tmp/myuplink-prometheus-src
+git clone --branch main --single-branch https://github.com/fiddeb/myuplink-exporter.git /tmp/myuplink-prometheus-src
 # Update the existing telemetry app's source files; /data and saved credentials are unaffected.
-cp -R /tmp/myuplink-prometheus-src/homeassistant/myuplink_cloud/. /addons/myuplink_cloud/
+sh /tmp/myuplink-prometheus-src/scripts/package-homeassistant.sh /addons/myuplink_cloud
 # Install the new app folder only if it does not already exist.
 test ! -e /addons/prometheus_local && cp -R /tmp/myuplink-prometheus-src/homeassistant/prometheus_local /addons/prometheus_local
 ```
@@ -24,7 +24,7 @@ of cloning over it. This assumes /addons is the local app directory mounted into
 your SSH app, as in the telemetry app installation.
 
 1. Settings → Apps → Install app → top-right menu → Check for updates.
-2. Update/rebuild **myUplink Cloud telemetry** to **0.3.0**, then restart it.
+2. Update/rebuild **myUplink Cloud telemetry** to **0.4.2**, then restart it.
    This lets Prometheus reach /probe over the internal app network. No host port
    is published by that app, and its Alloy still scrapes locally as before.
 3. Under Local apps, open **Prometheus Local**, then Install.

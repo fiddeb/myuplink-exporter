@@ -134,6 +134,13 @@ func myuplinkProbe(w http.ResponseWriter, r *http.Request) {
 				if events != nil && devicePoint.StrVal != nil {
 					events.point(system.SystemID, device.ID, devicePoint.ParameterID, *devicePoint.StrVal, devicePoint.Timestamp)
 				}
+				// EcoZenith has been observed returning -32768 for unavailable
+				// measurements (including return temperature and DHW capacity).
+				// Keep raw text events for diagnosis, but never publish this as
+				// a measurement, enum, counter or fresh measurement timestamp.
+				if strings.HasPrefix(device.Product.Name, "CTC EcoZenith") && devicePoint.Value != nil && *devicePoint.Value == -32768 {
+					continue
+				}
 				if !devicePoint.Timestamp.IsZero() {
 					metrics.pointTimestamp.WithLabelValues(system.SystemID, device.ID, devicePoint.ParameterID).Set(float64(devicePoint.Timestamp.UnixNano()) / 1e9)
 				}

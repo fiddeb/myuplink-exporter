@@ -12,7 +12,7 @@ coverage review, not proof of availability on a specific account or device.
 | `GET /v2/devices/{deviceId}/points` | Non-null numeric values, enums, source timestamps | String change events are emitted during background polling; validate units and scaling |
 | `GET /v3/devices/{deviceId}/points` | Not collected | Verify scaled values against v2/device displays before opting in; avoid silently changing existing values |
 | `GET /v2/systems/{systemId}/notifications/active` | Optional paginated active counts and grouped alarm counts | Lifecycle logs by alarm ID implemented; localized details and durable deduplication remain |
-| `POST /oauth/token` | Client credentials, synchronized renewal, typed OAuth errors | Rate-aware retry policy and handling an unexpectedly rejected access token |
+| `POST /oauth/token` | Client credentials, synchronized renewal, typed OAuth errors; an API 401 invalidates the rejected token and retries once with a replacement | Verify account-specific token lifetime |
 | Failed API responses | Typed APIError, HTTP status authoritative, 64 KiB error-body parsing limit, Retry-After retained | Shared request spacing and Retry-After cooldown implemented; request counters remain |
 
 ## Additional monitoring candidates

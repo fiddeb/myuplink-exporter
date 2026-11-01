@@ -80,10 +80,14 @@ startup authentication; background mode retries on later polls.
 
 ### Build and run this fork
 
+`main` is the integration and release branch. Create short-lived `feature/`
+branches from `main` and target pull requests to `main`. Install and update
+from `main` so the app includes the latest merged exporter sources.
+
 ```sh
 git clone https://github.com/fiddeb/myuplink-exporter.git
 cd myuplink-exporter
-git switch improve-monitoring
+git switch main
 go test -race ./...
 go build -o myuplink-exporter .
 # Set MYUPLINK_AUTH_CLIENTID and MYUPLINK_AUTH_CLIENTSECRET in the environment.
@@ -205,6 +209,14 @@ state changes. Numeric enum comparisons preserve fractional values.
 
 ## Home Assistant OS
 
+A read-only **myUplink Exporter custom integration** now creates Home Assistant
+entities directly from the exporter's cached Prometheus endpoint. Follow the
+[integration installation and test guide](homeassistant/INTEGRATION.md).
+Set the app option `cloud_enabled: false` to run without Grafana Cloud credentials
+or an Alloy process; the default `true` preserves existing Cloud installations.
+Prometheus export remains available in both modes.
+
+
 Use the two local apps under `homeassistant/` on **aarch64** (including Raspberry
 Pi 5 with 64-bit HAOS) or **amd64**. They are Supervisor-managed containers, not
 Debian packages installed on the HAOS host. Do not run Grafana Cloud's Linux
@@ -213,7 +225,7 @@ host networking, a Docker socket or a Home Assistant API token.
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.3.0 | Go exporter + Grafana Alloy; metrics and logs to Grafana Cloud |
+| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.4.2 | Go exporter + optional Grafana Alloy; local entities and/or Cloud telemetry |
 | [Prometheus Local](homeassistant/prometheus_local/DOCS.md) | 0.1.0 | Optional persistent local metrics history |
 
 ### How data flows
@@ -244,8 +256,8 @@ Terminal, with the local app folder mounted at `/addons`:
 
 ```sh
 test -d /addons || { echo '/addons is unavailable; check the SSH app mount or use Samba'; exit 1; }
-git clone --branch improve-monitoring --single-branch https://github.com/fiddeb/myuplink-exporter.git /tmp/myuplink-exporter-src
-test ! -e /addons/myuplink_cloud && cp -R /tmp/myuplink-exporter-src/homeassistant/myuplink_cloud /addons/myuplink_cloud
+git clone --branch main --single-branch https://github.com/fiddeb/myuplink-exporter.git /tmp/myuplink-exporter-src
+test ! -e /addons/myuplink_cloud && sh /tmp/myuplink-exporter-src/scripts/package-homeassistant.sh /addons/myuplink_cloud
 ```
 
 Use a fresh temporary path if it already exists. If the app directory exists,
@@ -256,14 +268,17 @@ follow the upgrade procedure instead of overwriting it during initial setup.
    **Local apps**.
 2. Select **Install**. Supervisor builds the container for your architecture;
    the first build needs internet access and can take several minutes.
-3. In **Configuration**, enter the myUplink client ID/secret and the Grafana
-   Cloud endpoints, usernames and tokens. Save, Start, and enable Start on boot.
+3. In **Configuration**, enter the myUplink client ID/secret. Keep
+   `cloud_enabled: true` and fill Cloud endpoints, usernames and tokens for
+   Grafana Cloud, or set it to `false` for exporter-only operation. Save, Start,
+   and enable Start on boot.
 4. Check the app Log tab and the queries in the [verification guide](homeassistant/myuplink_cloud/DOCS.md#verify).
    The first poll may temporarily return HTTP 503; then `up` and
    `myuplink_probe_success` should be 1.
 
 | App options | Where they come from |
 | --- | --- |
+| `cloud_enabled` | Whether to start Alloy; default true for existing installations |
 | `client_id`, `client_secret` | Your myUplink developer application |
 | `metrics_url`, `metrics_user`, `metrics_token` | Cloud Metrics remote-write endpoint, Metrics ID and token with `metrics:write` |
 | `loki_url`, `loki_user`, `loki_token` | Cloud Logs push endpoint, Logs ID and token with `logs:write` |
@@ -271,14 +286,18 @@ follow the upgrade procedure instead of overwriting it during initial setup.
 | `poll_interval`, `poll_timeout`, `request_interval` | Polling controls in seconds; defaults 60, 55, 3 |
 
 Use the exact endpoints from your Grafana Cloud stack; the Metrics ID and Logs ID
-are different fields. Both forwarding destinations are required by this package.
+are different fields. Both destinations are required only when `cloud_enabled`
+is true. With it false, Cloud fields may be empty or omitted.
 Store credentials in the app's Configuration UI, not in source files. Supervisor
 provides `/data/options.json`; the entrypoint passes the required credentials to
 each process through its environment. Treat app backups as sensitive.
 
 ### Packaging and updates
 
-Each app directory is a self-contained Docker build context:
+Prometheus Local is a self-contained Docker build context. For the telemetry
+app, `scripts/package-homeassistant.sh DESTINATION` assembles a self-contained
+context from the current checkout. It copies these app files and creates
+`exporter-source.tar` containing Go sources, tests, module manifests and the license:
 
 - `config.yaml`: app metadata, version, architectures, option schema and ports.
 - `Dockerfile`: upstream image versions and build stages.
@@ -286,17 +305,20 @@ Each app directory is a self-contained Docker build context:
   `config.alloy` for metrics/log forwarding.
 - `DOCS.md`: installation, configuration, troubleshooting and verification.
 
-The telemetry Dockerfile builds the Go exporter from pinned commit
-`ab61837c50d34e339fe47df7eb9f019803044a50`, copies Alloy **v1.21.3** from its
-upstream image, and runs both in a Python-based container. **Copying the latest
-app directory does not automatically build the latest exporter branch**: exporter
-code changes require updating this commit pin and bumping the app version.
+The telemetry Dockerfile builds the packaged exporter sources without fetching
+another branch or commit. Choose the checkout you want to install before
+packaging; local source edits are included too. Copying just
+`homeassistant/myuplink_cloud` is insufficient: use the packaging script so the
+build includes `exporter-source.tar`. Logs, credentials and Git history are excluded.
+The image copies Alloy **v1.21.3** from its upstream image and optionally runs
+Alloy alongside the exporter in a Python-based container.
 Prometheus Local copies Prometheus/promtool **v3.15.1** from its upstream image.
 Image tags are version-pinned, not digest-pinned.
 
-To upgrade, review the branch changes, copy the updated app directory contents
-into its existing `/addons/` directory, reload the app store, then update/rebuild
-and restart the app. Do not uninstall it to upgrade. A source-file copy alone
+To upgrade, update and review the checkout, then run
+`sh scripts/package-homeassistant.sh /addons/myuplink_cloud` again from the
+repository root. Reload the app store, update/rebuild and restart the app.
+Do not uninstall it to upgrade. Repackaging alone
 does not update the running container. Saved options and `/data` persist across
 normal updates; uninstalling may remove app data. Back up before upgrading.
 Dashboard JSON is imported separately into Grafana; app updates do not update
@@ -365,3 +387,13 @@ device, and missing/stale collection. They are configured separately from the
 Home Assistant apps and dashboard. Adapt the data source, instance and contact
 point before reuse, and test notification delivery. The export uses Grafana
 file-provisioning format, not dashboard JSON or a Prometheus rule file.
+
+### Unavailable CTC measurements
+
+The exporter omits numeric CTC EcoZenith points whose API value is exactly
+`-32768`, observed for unavailable return temperature and hot-water capacity.
+Their enum, calculated-total and measurement-timestamp samples are omitted too.
+Other points continue to be exported; valid readings resume automatically.
+Raw string events remain available for diagnosis. No zero or last-known value
+is substituted. Previously stored samples remain in Prometheus and Home Assistant
+Recorder; select a recent time range when checking the fix.
