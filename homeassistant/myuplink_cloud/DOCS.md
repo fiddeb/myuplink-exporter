@@ -24,7 +24,9 @@ reviewing the update. Samba may expose the same folder as local_apps or addons.
 3. Under Local apps, open **myUplink Cloud telemetry** and click Install.
 4. Installation builds the exporter from a pinned commit and downloads Alloy.
    Allow several minutes and internet access; inspect Supervisor logs on failure.
-5. Open Configuration and fill in every credential/endpoint field below, then Save.
+5. Open Configuration. Fill myUplink credentials. Set `cloud_enabled: false` for
+   exporter-only operation, or fill all Cloud credentials/endpoints to retain
+   Grafana Cloud telemetry (default `true`). Then Save.
 6. Click Start, enable Start on boot and optionally Watchdog. Keep Protection mode on.
 7. Inspect the app's Log tab.
 
@@ -36,6 +38,7 @@ updates need a reviewed Dockerfile pin and app version bump, followed by rebuild
 
 | Field | Value |
 | --- | --- |
+| cloud_enabled | Start Alloy and export to Grafana Cloud; default true. False requires no Cloud credentials. |
 | client_id | myUplink application's Client Identifier |
 | client_secret | myUplink application's Client Secret |
 | loki_url | Full Grafana Cloud Logs push URL, ending /loki/api/v1/push |
@@ -121,3 +124,11 @@ Alloy. Raw JSON remains intact; IDs and values are not indexed labels.
 Existing logs are unchanged. The dashboard formats both old and new logs using
 `| json | line_format`. Log time remains ingestion time; `source_timestamp`
 may be much older because it represents the upstream value's timestamp.
+
+## Home Assistant entities (0.4.0)
+
+Install the separate [custom integration](../INTEGRATION.md) to expose devices
+and sensors in Core. It reads the app's local `/probe` snapshot and works with
+Cloud export enabled or disabled. Update this local app's source directory and
+rebuild/update it through Supervisor to receive the new `cloud_enabled` option.
+Cloud URL validation still requires HTTPS when Cloud export is enabled.

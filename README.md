@@ -205,6 +205,14 @@ state changes. Numeric enum comparisons preserve fractional values.
 
 ## Home Assistant OS
 
+A read-only **myUplink Exporter custom integration** now creates Home Assistant
+entities directly from the exporter's cached Prometheus endpoint. Follow the
+[integration installation and test guide](homeassistant/INTEGRATION.md).
+Set the app option `cloud_enabled: false` to run without Grafana Cloud credentials
+or an Alloy process; the default `true` preserves existing Cloud installations.
+Prometheus export remains available in both modes.
+
+
 Use the two local apps under `homeassistant/` on **aarch64** (including Raspberry
 Pi 5 with 64-bit HAOS) or **amd64**. They are Supervisor-managed containers, not
 Debian packages installed on the HAOS host. Do not run Grafana Cloud's Linux
@@ -213,7 +221,7 @@ host networking, a Docker socket or a Home Assistant API token.
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.3.0 | Go exporter + Grafana Alloy; metrics and logs to Grafana Cloud |
+| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.4.0 | Go exporter + optional Grafana Alloy; local entities and/or Cloud telemetry |
 | [Prometheus Local](homeassistant/prometheus_local/DOCS.md) | 0.1.0 | Optional persistent local metrics history |
 
 ### How data flows
@@ -256,14 +264,17 @@ follow the upgrade procedure instead of overwriting it during initial setup.
    **Local apps**.
 2. Select **Install**. Supervisor builds the container for your architecture;
    the first build needs internet access and can take several minutes.
-3. In **Configuration**, enter the myUplink client ID/secret and the Grafana
-   Cloud endpoints, usernames and tokens. Save, Start, and enable Start on boot.
+3. In **Configuration**, enter the myUplink client ID/secret. Keep
+   `cloud_enabled: true` and fill Cloud endpoints, usernames and tokens for
+   Grafana Cloud, or set it to `false` for exporter-only operation. Save, Start,
+   and enable Start on boot.
 4. Check the app Log tab and the queries in the [verification guide](homeassistant/myuplink_cloud/DOCS.md#verify).
    The first poll may temporarily return HTTP 503; then `up` and
    `myuplink_probe_success` should be 1.
 
 | App options | Where they come from |
 | --- | --- |
+| `cloud_enabled` | Whether to start Alloy; default true for existing installations |
 | `client_id`, `client_secret` | Your myUplink developer application |
 | `metrics_url`, `metrics_user`, `metrics_token` | Cloud Metrics remote-write endpoint, Metrics ID and token with `metrics:write` |
 | `loki_url`, `loki_user`, `loki_token` | Cloud Logs push endpoint, Logs ID and token with `logs:write` |
@@ -271,7 +282,8 @@ follow the upgrade procedure instead of overwriting it during initial setup.
 | `poll_interval`, `poll_timeout`, `request_interval` | Polling controls in seconds; defaults 60, 55, 3 |
 
 Use the exact endpoints from your Grafana Cloud stack; the Metrics ID and Logs ID
-are different fields. Both forwarding destinations are required by this package.
+are different fields. Both destinations are required only when `cloud_enabled`
+is true. With it false, Cloud fields may be empty or omitted.
 Store credentials in the app's Configuration UI, not in source files. Supervisor
 provides `/data/options.json`; the entrypoint passes the required credentials to
 each process through its environment. Treat app backups as sensitive.
@@ -288,7 +300,7 @@ Each app directory is a self-contained Docker build context:
 
 The telemetry Dockerfile builds the Go exporter from pinned commit
 `ab61837c50d34e339fe47df7eb9f019803044a50`, copies Alloy **v1.21.3** from its
-upstream image, and runs both in a Python-based container. **Copying the latest
+upstream image, and optionally runs Alloy alongside the exporter in a Python-based container. **Copying the latest
 app directory does not automatically build the latest exporter branch**: exporter
 code changes require updating this commit pin and bumping the app version.
 Prometheus Local copies Prometheus/promtool **v3.15.1** from its upstream image.
