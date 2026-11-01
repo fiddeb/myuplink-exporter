@@ -1,10 +1,12 @@
 package myuplink
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
-	"sync"
+	"net/http"
 	"time"
 
 	"github.com/webdevops/go-common/log/slogger"
@@ -20,19 +22,21 @@ type (
 		clientSecret string
 
 		gate    *requestGate
-		tokenMu sync.Mutex
+		tokenMu contextMutex
 		token   *AuthToken
 	}
 )
 
 func NewClient(logger *slogger.Logger) *Client {
 	c := Client{
-		logger: logger,
-		http:   resty.New(),
+		logger:  logger,
+		http:    resty.New(),
+		tokenMu: make(contextMutex, 1),
 	}
 
-	c.gate = &requestGate{base: errorBodyTransport{base: c.http.Transport()}}
+	c.gate = &requestGate{base: errorBodyTransport{base: c.http.Transport()}, mu: make(contextMutex, 1)}
 	c.http.SetTransport(c.gate)
+	c.http.SetHeader("Accept", "application/json")
 	c.http.SetRetryCount(5)
 	c.http.SetRetryWaitTime(5 * time.Second)
 	c.http.SetRetryMaxWaitTime(30 * time.Second)
@@ -59,7 +63,9 @@ func (c *Client) SetAuth(clientId, clientSecret string) {
 }
 
 func (c *Client) Connect(ctx context.Context) error {
-	c.tokenMu.Lock()
+	if err := c.tokenMu.Lock(ctx); err != nil {
+		return err
+	}
 	defer c.tokenMu.Unlock()
 	return c.connect(ctx)
 }
@@ -80,7 +86,6 @@ func (c *Client) connect(ctx context.Context) error {
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(payload).
 		SetBasicAuth(c.clientId, c.clientSecret).
-		SetResult(result).
 		Post("oauth/token")
 	if err != nil {
 		return err
@@ -88,6 +93,9 @@ func (c *Client) connect(ctx context.Context) error {
 
 	if !resp.IsStatusSuccess() {
 		return responseError(resp, "token", true)
+	}
+	if err := decodeSuccess(resp, result, "token"); err != nil {
+		return err
 	}
 
 	if result.AccessToken == "" || result.ExpiresIn <= 0 {
@@ -99,7 +107,9 @@ func (c *Client) connect(ctx context.Context) error {
 }
 
 func (c *Client) createRequest(ctx context.Context) (*resty.Request, error) {
-	c.tokenMu.Lock()
+	if err := c.tokenMu.Lock(ctx); err != nil {
+		return nil, err
+	}
 	defer c.tokenMu.Unlock()
 	if c.token == nil || c.token.IsExpired() {
 		if err := c.connect(ctx); err != nil {
@@ -109,20 +119,53 @@ func (c *Client) createRequest(ctx context.Context) (*resty.Request, error) {
 	return c.http.R().SetContext(ctx).SetAuthToken(c.token.AccessToken), nil
 }
 
+// getJSON retries a rejected token once; concurrent rejections of an older
+// token must not invalidate a replacement another request has already obtained.
+func (c *Client) getJSON(ctx context.Context, path, operation string, result any) error {
+	for attempt := 0; ; attempt++ {
+		req, err := c.createRequest(ctx)
+		if err != nil {
+			return err
+		}
+		resp, err := req.Get(path)
+		if err != nil {
+			return err
+		}
+		if resp.StatusCode() == http.StatusUnauthorized {
+			if err := c.tokenMu.Lock(ctx); err != nil {
+				return err
+			}
+			if c.token != nil && c.token.AccessToken == req.AuthToken {
+				c.token = nil
+			}
+			c.tokenMu.Unlock()
+			if attempt == 0 {
+				continue
+			}
+		}
+		if !resp.IsStatusSuccess() {
+			return responseError(resp, operation, false)
+		}
+		return decodeSuccess(resp, result, operation)
+	}
+}
+
+func decodeSuccess(resp *resty.Response, result any, operation string) error {
+	// Decode explicitly: Resty otherwise silently skips JSON returned as text/plain.
+	body := resp.Bytes()
+	if bytes.Equal(bytes.TrimSpace(body), []byte("null")) || json.Unmarshal(body, result) != nil {
+		// JSON parser errors may contain upstream data; do not log their text.
+		return fmt.Errorf("myUplink %s: invalid JSON response", operation)
+	}
+	return nil
+}
+
 func (c *Client) GetSystems(ctx context.Context) (*ResultSystems, error) {
 	result := &ResultSystems{}
 	for page := 1; ; page++ {
-		req, err := c.createRequest(ctx)
-		if err != nil {
-			return nil, err
-		}
 		batch := &ResultSystems{}
-		resp, err := req.SetResult(batch).Get(fmt.Sprintf("/v2/systems/me?page=%d&itemsPerPage=100", page))
-		if err != nil {
+		if err := c.getJSON(ctx, fmt.Sprintf("/v2/systems/me?page=%d&itemsPerPage=100", page), "systems", batch); err != nil {
 			return nil, err
-		}
-		if !resp.IsStatusSuccess() {
-			return nil, responseError(resp, "systems", false)
 		}
 		result.Systems = append(result.Systems, batch.Systems...)
 		result.NumItems = batch.NumItems
@@ -140,17 +183,9 @@ func (c *Client) GetSystems(ctx context.Context) (*ResultSystems, error) {
 func (c *Client) GetSystemActiveAlarms(ctx context.Context, systemID string) ([]Alarm, error) {
 	var alarms []Alarm
 	for page := 1; ; page++ {
-		req, err := c.createRequest(ctx)
-		if err != nil {
-			return nil, err
-		}
 		batch := &ResultAlarms{}
-		resp, err := req.SetResult(batch).Get(fmt.Sprintf("/v2/systems/%s/notifications/active?page=%d&itemsPerPage=100", systemID, page))
-		if err != nil {
+		if err := c.getJSON(ctx, fmt.Sprintf("/v2/systems/%s/notifications/active?page=%d&itemsPerPage=100", systemID, page), "active_alarms", batch); err != nil {
 			return nil, err
-		}
-		if !resp.IsStatusSuccess() {
-			return nil, responseError(resp, "active_alarms", false)
 		}
 		alarms = append(alarms, batch.Notifications...)
 		size := batch.ItemsPerPage
@@ -168,17 +203,8 @@ func (c *Client) GetSystemDevicePoints(ctx context.Context, deviceId string) (*S
 
 	c.logger.Debug(`fetch myUplink device points`, slog.String("deviceID", deviceId))
 
-	req, err := c.createRequest(ctx)
-	if err != nil {
+	if err := c.getJSON(ctx, fmt.Sprintf("/v2/devices/%s/points", deviceId), "device_points", result); err != nil {
 		return nil, err
-	}
-	resp, err := req.SetResult(result).Get(fmt.Sprintf("/v2/devices/%s/points", deviceId))
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.IsStatusSuccess() {
-		return nil, responseError(resp, "device_points", false)
 	}
 
 	return result, nil
@@ -189,17 +215,8 @@ func (c *Client) GetSystemDeviceFirmware(ctx context.Context, deviceId string) (
 
 	c.logger.Debug(`fetch myUplink device firmware info`, slog.String("deviceID", deviceId))
 
-	req, err := c.createRequest(ctx)
-	if err != nil {
+	if err := c.getJSON(ctx, fmt.Sprintf("/v2/devices/%s/firmware-info", deviceId), "firmware_info", result); err != nil {
 		return nil, err
-	}
-	resp, err := req.SetResult(result).Get(fmt.Sprintf("/v2/devices/%s/firmware-info", deviceId))
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.IsStatusSuccess() {
-		return nil, responseError(resp, "firmware_info", false)
 	}
 
 	return result, nil

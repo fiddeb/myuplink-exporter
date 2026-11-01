@@ -6,6 +6,7 @@ loki.source.journal "myuplink" {
   labels     = {
     service_name = "myuplink-exporter",
     host         = constants.hostname,
+    instance     = constants.hostname,
   }
   forward_to = [loki.process.myuplink.receiver]
 }

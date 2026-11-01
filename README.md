@@ -221,7 +221,7 @@ host networking, a Docker socket or a Home Assistant API token.
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.4.1 | Go exporter + optional Grafana Alloy; local entities and/or Cloud telemetry |
+| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.4.2 | Go exporter + optional Grafana Alloy; local entities and/or Cloud telemetry |
 | [Prometheus Local](homeassistant/prometheus_local/DOCS.md) | 0.1.0 | Optional persistent local metrics history |
 
 ### How data flows
@@ -253,7 +253,7 @@ Terminal, with the local app folder mounted at `/addons`:
 ```sh
 test -d /addons || { echo '/addons is unavailable; check the SSH app mount or use Samba'; exit 1; }
 git clone --branch improve-monitoring --single-branch https://github.com/fiddeb/myuplink-exporter.git /tmp/myuplink-exporter-src
-test ! -e /addons/myuplink_cloud && cp -R /tmp/myuplink-exporter-src/homeassistant/myuplink_cloud /addons/myuplink_cloud
+test ! -e /addons/myuplink_cloud && sh /tmp/myuplink-exporter-src/scripts/package-homeassistant.sh /addons/myuplink_cloud
 ```
 
 Use a fresh temporary path if it already exists. If the app directory exists,
@@ -290,7 +290,10 @@ each process through its environment. Treat app backups as sensitive.
 
 ### Packaging and updates
 
-Each app directory is a self-contained Docker build context:
+Prometheus Local is a self-contained Docker build context. For the telemetry
+app, `scripts/package-homeassistant.sh DESTINATION` assembles a self-contained
+context from the current checkout. It copies these app files and creates
+`exporter-source.tar` containing Go sources, tests, module manifests and the license:
 
 - `config.yaml`: app metadata, version, architectures, option schema and ports.
 - `Dockerfile`: upstream image versions and build stages.
@@ -298,17 +301,20 @@ Each app directory is a self-contained Docker build context:
   `config.alloy` for metrics/log forwarding.
 - `DOCS.md`: installation, configuration, troubleshooting and verification.
 
-The telemetry Dockerfile builds the Go exporter from pinned commit
-`ab61837c50d34e339fe47df7eb9f019803044a50`, copies Alloy **v1.21.3** from its
-upstream image, and optionally runs Alloy alongside the exporter in a Python-based container. **Copying the latest
-app directory does not automatically build the latest exporter branch**: exporter
-code changes require updating this commit pin and bumping the app version.
+The telemetry Dockerfile builds the packaged exporter sources without fetching
+another branch or commit. Choose the checkout you want to install before
+packaging; local source edits are included too. Copying just
+`homeassistant/myuplink_cloud` is insufficient: use the packaging script so the
+build includes `exporter-source.tar`. Logs, credentials and Git history are excluded.
+The image copies Alloy **v1.21.3** from its upstream image and optionally runs
+Alloy alongside the exporter in a Python-based container.
 Prometheus Local copies Prometheus/promtool **v3.15.1** from its upstream image.
 Image tags are version-pinned, not digest-pinned.
 
-To upgrade, review the branch changes, copy the updated app directory contents
-into its existing `/addons/` directory, reload the app store, then update/rebuild
-and restart the app. Do not uninstall it to upgrade. A source-file copy alone
+To upgrade, update and review the checkout, then run
+`sh scripts/package-homeassistant.sh /addons/myuplink_cloud` again from the
+repository root. Reload the app store, update/rebuild and restart the app.
+Do not uninstall it to upgrade. Repackaging alone
 does not update the running container. Saved options and `/data` persist across
 normal updates; uninstalling may remove app data. Back up before upgrading.
 Dashboard JSON is imported separately into Grafana; app updates do not update

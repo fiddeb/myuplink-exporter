@@ -1,5 +1,5 @@
 name: myUplink Cloud telemetry
-version: "0.4.1"
+version: "0.4.2"
 slug: myuplink_cloud
 description: myUplink exporter for Home Assistant with optional Grafana Cloud telemetry
 url: https://github.com/fiddeb/myuplink-exporter

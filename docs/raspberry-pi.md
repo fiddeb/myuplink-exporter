@@ -106,7 +106,9 @@ is the Loki event time. observed_at is the exporter's observation time;
 source_timestamp is the API's timestamp, possibly last-change time. Do not use it
 as Loki's timestamp or infer freshness for every setting from it.
 
-Log labels are service_name, host and Alloy's journal job label. device_id,
+Log labels include service_name, host, instance, level, event and Alloy's journal
+job label. The instance label matches the hostname used by metrics so the bundled
+dashboard log panels select the same installation. device_id,
 parameter_id, alarm_id and value stay inside JSON and are extracted with | json.
 No per-device or per-point labels are added to Loki streams.
 

@@ -12,7 +12,7 @@ Open Advanced SSH & Web Terminal. The local apps folder is usually mounted as
 ```sh
 test -d /addons || { echo '/addons is unavailable: use Samba to access local_apps'; exit 1; }
 git clone --branch improve-monitoring --single-branch https://github.com/fiddeb/myuplink-exporter.git /tmp/myuplink-exporter-src
-test ! -e /addons/myuplink_cloud && cp -R /tmp/myuplink-exporter-src/homeassistant/myuplink_cloud /addons/myuplink_cloud
+test ! -e /addons/myuplink_cloud && sh /tmp/myuplink-exporter-src/scripts/package-homeassistant.sh /addons/myuplink_cloud
 ```
 
 If the temporary clone path already exists, use a different temporary path or
@@ -22,7 +22,7 @@ reviewing the update. Samba may expose the same folder as local_apps or addons.
 1. Settings → Apps → Install app (older UI: Settings → Add-ons → Add-on store).
 2. Use the top-right menu to check for updates/reload the store.
 3. Under Local apps, open **myUplink Cloud telemetry** and click Install.
-4. Installation builds the exporter from a pinned commit and downloads Alloy.
+4. Installation builds the exporter from the packaged checkout and downloads Alloy.
    Allow several minutes and internet access; inspect Supervisor logs on failure.
 5. Open Configuration. Fill myUplink credentials. Set `cloud_enabled: false` for
    exporter-only operation, or fill all Cloud credentials/endpoints to retain
@@ -30,9 +30,28 @@ reviewing the update. Samba may expose the same folder as local_apps or addons.
 6. Click Start, enable Start on boot and optionally Watchdog. Keep Protection mode on.
 7. Inspect the app's Log tab.
 
-This is a local app build, not a prebuilt signed release. The pinned exporter
-source is ab61837c50d34e339fe47df7eb9f019803044a50. Alloy is v1.21.3. Future source
-updates need a reviewed Dockerfile pin and app version bump, followed by rebuild.
+The packaging script copies the checkout's current Go sources, tests, module
+manifests and license into `exporter-source.tar` inside the app directory. Docker builds
+these sources directly; it does not fetch an exporter commit or branch. Local
+source edits are included. Logs, credentials and Git history are excluded.
+Choose the checkout you want before packaging and keep the package to rebuild
+the same exporter sources. Copying only `homeassistant/myuplink_cloud` does not
+include the source archive and will fail to build. This is a local app build,
+not a prebuilt signed release. Alloy remains v1.21.3.
+
+## Upgrade to 0.4.2
+
+Update and review your repository checkout, then run from its root:
+
+```sh
+sh scripts/package-homeassistant.sh /addons/myuplink_cloud
+```
+
+Reload the app store, update/rebuild the local app and restart it. Re-run the
+packaging script after exporter source changes; rebuilding an old package uses
+that package's sources. The script replaces the source archive, including
+removing deleted source files, and leaves Supervisor options and `/data` intact.
+Do not uninstall the app to upgrade.
 
 ## Configuration
 
@@ -117,8 +136,8 @@ Assistant by creating these files.
 
 ## Upgrade to 0.3.0
 
-Copy the updated app directory from branch `improve-monitoring` into
-`/addons/myuplink_cloud`, then rebuild/update the local app and restart it.
+Package the updated checkout with `scripts/package-homeassistant.sh` as described
+above, then rebuild/update the local app and restart it.
 Version 0.3.0 parses JSON and attaches bounded `level` and `event` labels in
 Alloy. Raw JSON remains intact; IDs and values are not indexed labels.
 Existing logs are unchanged. The dashboard formats both old and new logs using
