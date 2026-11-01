@@ -15,7 +15,7 @@ import (
 
 func TestProbeMonitoring(t *testing.T) {
 	alarmCalls := 0
-	pointFailure, alarmFailure, systemFailure, cleared, noTimestamp := false, false, false, false, false
+	pointFailure, alarmFailure, systemFailure, cleared, noTimestamp, invalidAlarm := false, false, false, false, false, false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
@@ -29,6 +29,11 @@ func TestProbeMonitoring(t *testing.T) {
 			fmt.Fprintf(w, `{"numItems":1,"systems":[{"systemId":"s","hasAlarm":%t,"devices":[{"id":"offline","connectionState":"Disconnected"},{"id":"bad","connectionState":"Connected"},{"id":"good","connectionState":"Connected"}]}]}`, !cleared)
 		case "/v2/systems/s/notifications/active":
 			alarmCalls++
+			if invalidAlarm {
+				w.Header().Set("Content-Type", "text/html")
+				fmt.Fprint(w, "<html>Maintenance</html>")
+				return
+			}
 			if alarmFailure {
 				w.WriteHeader(http.StatusForbidden)
 				return
@@ -37,7 +42,7 @@ func TestProbeMonitoring(t *testing.T) {
 				fmt.Fprint(w, `{"numItems":0,"notifications":[]}`)
 				return
 			}
-			fmt.Fprint(w, `{"numItems":2,"notifications":[{"deviceId":"good","alarmNumber":42,"severity":1},{"deviceId":"good","alarmNumber":42,"severity":1}]}`)
+			fmt.Fprint(w, `{"numItems":2,"notifications":[{"id":"a","deviceId":"good","alarmNumber":42,"severity":1},{"id":"b","deviceId":"good","alarmNumber":42,"severity":1}]}`)
 		case "/v2/devices/bad/points":
 			if pointFailure {
 				w.WriteHeader(http.StatusForbidden)
@@ -57,9 +62,12 @@ func TestProbeMonitoring(t *testing.T) {
 	}))
 	defer server.Close()
 	previousOpts, previousLogger, previousClient, previousCache := Opts, logger, myuplinkClient, globalCache
+	previousEvents := events
 	t.Cleanup(func() {
 		Opts, logger, myuplinkClient, globalCache = previousOpts, previousLogger, previousClient, previousCache
+		events = previousEvents
 	})
+	events = newEventTracker()
 	Opts.Logger.Level = "error"
 	initLogger()
 	Opts.MyUplink.Device.AllowedConnectionStates = []string{"Connected"}
@@ -111,7 +119,13 @@ func TestProbeMonitoring(t *testing.T) {
 	if strings.Contains(body, "myuplink_system_active_alarms{") {
 		t.Fatal("failed alarm request must not report zero alarms")
 	}
-	alarmFailure, cleared = false, true
+	alarmFailure, invalidAlarm = false, true
+	body = probe()
+	contains(body, "myuplink_probe_success 0")
+	if strings.Contains(body, "myuplink_system_active_alarms{") || len(events.alarms["s"]) != 2 {
+		t.Fatal("invalid alarm response must not report zero or resolve known alarms")
+	}
+	invalidAlarm, cleared = false, true
 	body = probe()
 	contains(body, `myuplink_system_has_alarm{systemID="s"} 0`)
 	contains(body, `myuplink_system_active_alarms{systemID="s"} 0`)

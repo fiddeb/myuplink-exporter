@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -12,12 +11,15 @@ import (
 // Quotas can differ by account: configure the minimum spacing accordingly.
 type requestGate struct {
 	base     http.RoundTripper
-	mu       sync.Mutex
+	mu       contextMutex
 	interval time.Duration
 	next     time.Time
 }
 
 func waitUntil(ctx context.Context, until time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	timer := time.NewTimer(time.Until(until))
 	defer timer.Stop()
 	select {
@@ -37,7 +39,9 @@ func retryDelay(header string, now time.Time) time.Duration {
 	return time.Minute
 }
 func (g *requestGate) RoundTrip(req *http.Request) (*http.Response, error) {
-	g.mu.Lock()
+	if err := g.mu.Lock(req.Context()); err != nil {
+		return nil, err
+	}
 	defer g.mu.Unlock()
 	if err := waitUntil(req.Context(), g.next); err != nil {
 		return nil, err
@@ -55,7 +59,7 @@ func (g *requestGate) RoundTrip(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 func (c *Client) SetRequestInterval(interval time.Duration) {
-	c.gate.mu.Lock()
+	_ = c.gate.mu.Lock(context.Background())
 	defer c.gate.mu.Unlock()
 	c.gate.interval = interval
 }

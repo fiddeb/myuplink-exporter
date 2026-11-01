@@ -16,9 +16,11 @@ go build -o myuplink-exporter .
 ```
 
 Expected: all tests pass. They cover API/OAuth error parsing, bounded error bodies,
-pagination, token refresh, partial collection failures, offline devices, string
+pagination, token refresh and bounded 401 recovery, explicit JSON decoding,
+concurrent calculated totals, partial collection failures, offline devices, string
 change deduplication, empty-string transitions, alarm transitions, snapshot serving,
-Retry-After and cancellation while rate-limited. These tests do not verify the
+Retry-After and cancellation while rate-limited, queued or waiting for token renewal.
+These tests do not verify the
 manufacturer's numeric scaling or account-specific endpoint access.
 
 ## 2. Start against your own installation
