@@ -29,6 +29,12 @@ class SnapshotTests(unittest.TestCase):
         self.assertFalse(values['s2', 'd', 'compressor_running']['value'])
         self.assertFalse(values['s', 'system', 'alarm']['value'])
 
+    def test_ctc_compressor_with_empty_api_unit(self):
+        text = (HEADER + POINTS).replace('deviceName="CTC"', 'deviceName="CTC EcoZenith i360"').replace('parameterUnit="RPS"', 'parameterUnit=""')
+        result = data.parse_snapshot(text, now=1001)
+        self.assertTrue(result['values']['s', 'd', 'compressor_running']['value'])
+        self.assertNotIn(('s2', 'd', 'compressor_running'), result['values'])
+
     def test_failed_stale_missing_and_future_poll(self):
         for text, now in [(HEADER, 1301), (HEADER, 999),
                           (HEADER.replace('success 1', 'success 0'), 1001),

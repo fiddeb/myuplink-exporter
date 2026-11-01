@@ -49,6 +49,6 @@ def parse_snapshot(text, max_age=300, now=None):
             values[key].update(value=value, unit="")
     # Only the CTC RPS parameter has a verified compressor-running interpretation.
     for key, point in list(values.items()):
-        if key[2] == "62193" and point.get("unit") == "RPS" and isinstance(point["value"], (int, float)):
+        if key[2] == "62193" and (point.get("unit") == "RPS" or devices.get(key[:2], {}).get("deviceName", "").startswith("CTC EcoZenith")) and isinstance(point["value"], (int, float)):
             values[(*key[:2], "compressor_running")] = dict(value=point["value"] > 0, name="Compressor running", binary=True, device_class="running")
     return dict(devices=devices, values=values)
