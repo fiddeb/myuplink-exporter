@@ -140,3 +140,12 @@ Missing samples are not converted to stopped. Check collection/device health
 separately: myUplink can report a last-known value. Queries request a 15-second minimum step and 5000 points,
 but longer time ranges can use a larger step. Actual resolution is limited by
 myUplink updates and polling, so this is not a precise compressor-cycle counter.
+
+The overview places the system Canvas on the left and operating mode,
+connection, alarm status and polling age in a right-hand column. Normal
+connection/alarm/poll-age states use white text; warning/error colors remain.
+The default time range is 12 hours. Both languages and both layout formats use
+this arrangement; the classic dashboard retains its detailed sections below.
+Run `python scripts/build_canvas.py` to regenerate the Canvas without reverting
+this overview layout. Repository imports keep data-source and device selectors
+visible and do not include saved selections from a personal Grafana instance.

@@ -92,13 +92,13 @@ def canvas(english=False, dynamic=True):
     text('pump-link',t('Värmepump →','Heat pump →'),35,402,250,28,16,'Compressor speed',color='#8AB8F0')
     text('tank-link',t('Varmvatten →','Hot water →'),455,402,330,28,16,'Tank temperature',color='#8AB8F0')
     text('house-link',t('Husvärme →','Space heating →'),875,402,250,28,16,'Heating flow',color='#8AB8F0')
-    text('schematic-note',t('Schematisk koppling · linjer visar inte uppmätt flöde · kontrollera insamlingsstatus ovan','Schematic connections · lines do not represent measured flow · check collection health above'),20,448,1120,24,13)
+    text('schematic-note',t('Schematisk koppling · linjer visar inte uppmätt flöde · kontrollera insamlingsstatus','Schematic connections · lines do not represent measured flow · check collection health'),20,448,1120,24,13)
     # Element-level links enable Canvas one-click navigation.
     links_by_field={o['matcher']['options']:next(p['value'] for p in o['properties'] if p['id']=='links') for o in overrides}
     for element in els:
         field=element['config'].get('text',{}).get('field')
         if field in links_by_field:element['links']=copy.deepcopy(links_by_field[field])
-    return {'id':PANEL_ID,'title':t('Systembild · värmepump, varmvatten och hus','System overview · heat pump, hot water and home'),'type':'canvas','pluginVersion':'13.3.0','description':t('Schematisk systembild, inte ett verifierat hydraulschema. Värden är senaste rapporterade API-värden och kan vara gamla vid insamlingsfel. Saknade data visas som —. Klicka på mätvärden eller detaljlänkar för rätt flik. Electric power och Immersion heater visas separat; de summeras inte.','Schematic overview, not a verified hydraulic diagram. Values are last-reported API values and may be stale on collection failure. Missing data is shown as —. Click readings or detail links to navigate. Electric power and Immersion heater are shown separately, not summed.'),'datasource':{'type':'prometheus','uid':'${datasource}'},'targets':targets,'fieldConfig':{'defaults':{'color':{'mode':'fixed','fixedColor':'#F4F5F8'},'decimals':1,'noValue':'—','mappings':[]},'overrides':overrides},'options':{'inlineEditing':False,'panZoom':True,'zoomToContent':True,'showAdvancedTypes':False,'tooltip':{'mode':'single','disableForOneClick':False},'root':{'name':'Heat pump system','type':'frame','placement':{'left':0,'top':0,'width':1160,'height':480},'background':{'color':{'fixed':'transparent'}},'elements':els}},'gridPos':{'x':0,'y':4,'w':24,'h':15}}
+    return {'id':PANEL_ID,'title':t('Systembild · värmepump, varmvatten och hus','System overview · heat pump, hot water and home'),'type':'canvas','pluginVersion':'13.3.1','description':t('Schematisk systembild, inte ett verifierat hydraulschema. Värden är senaste rapporterade API-värden och kan vara gamla vid insamlingsfel. Saknade data visas som —. Klicka på mätvärden eller detaljlänkar för rätt flik. Electric power och Immersion heater visas separat; de summeras inte.','Schematic overview, not a verified hydraulic diagram. Values are last-reported API values and may be stale on collection failure. Missing data is shown as —. Click readings or detail links to navigate. Electric power and Immersion heater are shown separately, not summed.'),'datasource':{'type':'prometheus','uid':'${datasource}'},'targets':targets,'fieldConfig':{'defaults':{'color':{'mode':'fixed','fixedColor':'#F4F5F8'},'decimals':1,'noValue':'—','thresholds':{'mode':'absolute','steps':[{'color':'green','value':0},{'color':'red','value':80}]}},'overrides':overrides},'options':{'inlineEditing':False,'panZoom':True,'zoomToContent':True,'showAdvancedTypes':False,'tooltip':{'mode':'single','disableForOneClick':False},'root':{'border':{'color':{'fixed':'dark-green'}},'constraint':{'horizontal':'left','vertical':'top'},'name':'Heat pump system','type':'frame','placement':{'left':0,'top':0,'width':1160,'height':480},'background':{'color':{'fixed':'transparent'}},'elements':els}},'gridPos':{'x':0,'y':4,'w':24,'h':15}}
 
 
 def v2(panel):
@@ -106,7 +106,7 @@ def v2(panel):
     for q in panel['targets']:
         spec={k:v for k,v in q.items() if k not in ('datasource','refId')}
         queries.append({'kind':'PanelQuery','spec':{'refId':q['refId'],'hidden':False,'query':{'kind':'DataQuery','group':'prometheus','version':'v0','datasource':{'name':'${datasource}'},'spec':spec}}})
-    return {'kind':'Panel','spec':{'id':PANEL_ID,'title':panel['title'],'description':panel['description'],'links':[],'data':{'kind':'QueryGroup','spec':{'queries':queries,'transformations':[],'queryOptions':{}}},'vizConfig':{'kind':'VizConfig','group':'canvas','version':'13.3.0','spec':{'fieldConfig':panel['fieldConfig'],'options':panel['options']}}}}
+    return {'kind':'Panel','spec':{'id':PANEL_ID,'title':panel['title'],'description':panel['description'],'links':[],'data':{'kind':'QueryGroup','spec':{'queries':queries,'transformations':[],'queryOptions':{}}},'vizConfig':{'kind':'VizConfig','group':'canvas','version':'13.3.1','spec':{'fieldConfig':panel['fieldConfig'],'options':panel['options']}}}}
 
 
 def main():
@@ -116,9 +116,10 @@ def main():
         if dynamic:
             d['spec']['elements']['panel-500']=v2(p)
             items=d['spec']['layout']['spec']['tabs'][0]['spec']['layout']['spec']['items']
-            items[:]=[it for it in items if it['spec']['element']['name'] not in ['panel-500','panel-402','panel-403','panel-404','panel-405','panel-300','panel-205']]
-            for id_,y,h in [(500,3,15),(300,18,8),(205,26,7)]:
-                items.append({'kind':'GridLayoutItem','spec':{'x':0,'y':y,'width':24,'height':h,'element':{'kind':'ElementReference','name':'panel-'+str(id_)}}})
+            # Keep the user-designed overview: system image left, status right.
+            items.clear()
+            for id_,x,y,w,h in [(500,0,0,15,16),(9,15,0,9,4),(2,15,4,9,4),(3,15,8,9,4),(401,15,12,9,4),(300,0,16,24,6),(205,0,22,24,8)]:
+                items.append({'kind':'GridLayoutItem','spec':{'x':x,'y':y,'width':w,'height':h,'element':{'kind':'ElementReference','name':'panel-'+str(id_)}}})
             for id_ in (402,403,404,405):d['spec']['elements'].pop('panel-'+str(id_),None)
         else:
             # Idempotent insertion before the existing timeline; retain classic rows.
