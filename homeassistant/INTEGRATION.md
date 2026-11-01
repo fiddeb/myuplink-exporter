@@ -10,7 +10,7 @@ Tested with Home Assistant Core **2026.10.4** and Python **3.14**.
 
 ## Install
 
-1. Install/update the local `myuplink_cloud` app to **0.4.0**, following its
+1. Install/update the local `myuplink_cloud` app to **0.4.1**, following its
    [app instructions](myuplink_cloud/DOCS.md). Start the app and wait for a
    successful poll. Keep `cloud_enabled: true` for existing Grafana Cloud
    telemetry, or set it to `false` to run the exporter alone.

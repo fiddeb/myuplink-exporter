@@ -132,3 +132,11 @@ and sensors in Core. It reads the app's local `/probe` snapshot and works with
 Cloud export enabled or disabled. Update this local app's source directory and
 rebuild/update it through Supervisor to receive the new `cloud_enabled` option.
 Cloud URL validation still requires HTTPS when Cloud export is enabled.
+
+## Unavailable measurements (0.4.1)
+
+CTC EcoZenith numeric values of exactly -32768 are now omitted at the exporter,
+including their measurement timestamps, enum and calculated-total samples.
+This protects both local Prometheus and Grafana Cloud. Home Assistant entities
+remain unavailable until valid values return. Raw text events are retained for
+diagnosis. Existing historical samples are not removed.

@@ -221,7 +221,7 @@ host networking, a Docker socket or a Home Assistant API token.
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.4.0 | Go exporter + optional Grafana Alloy; local entities and/or Cloud telemetry |
+| [myUplink Cloud telemetry](homeassistant/myuplink_cloud/DOCS.md) | 0.4.1 | Go exporter + optional Grafana Alloy; local entities and/or Cloud telemetry |
 | [Prometheus Local](homeassistant/prometheus_local/DOCS.md) | 0.1.0 | Optional persistent local metrics history |
 
 ### How data flows

@@ -2,7 +2,7 @@ FROM golang:1.27.3-bookworm AS exporter
 WORKDIR /src
 # Pin exporter source independently of the local app build context.
 RUN git init && git remote add origin https://github.com/fiddeb/myuplink-exporter.git \
-    && git fetch --depth=1 origin ab61837c50d34e339fe47df7eb9f019803044a50 \
+    && git fetch --depth=1 origin 40c878176aaedce53b6142ec6091e183f74cd075 \
     && git checkout FETCH_HEAD
 RUN CGO_ENABLED=0 go build -trimpath -o /myuplink-exporter .
 
