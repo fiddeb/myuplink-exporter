@@ -29,6 +29,13 @@ class SnapshotTests(unittest.TestCase):
         self.assertFalse(values['s2', 'd', 'compressor_running']['value'])
         self.assertFalse(values['s', 'system', 'alarm']['value'])
 
+    def test_ctc_missing_value_not_exposed_as_measurement_or_running(self):
+        text = (HEADER + POINTS).replace('deviceName="CTC"', 'deviceName="CTC EcoZenith i360"').replace('} 23', '} -32768')
+        values = data.parse_snapshot(text, now=1001)['values']
+        self.assertNotIn(('s', 'd', '62193'), values)
+        self.assertNotIn(('s', 'd', 'compressor_running'), values)
+        self.assertIn(('s', 'd', 'connected'), values)
+
     def test_ctc_compressor_with_empty_api_unit(self):
         text = (HEADER + POINTS).replace('deviceName="CTC"', 'deviceName="CTC EcoZenith i360"').replace('parameterUnit="RPS"', 'parameterUnit=""')
         result = data.parse_snapshot(text, now=1001)

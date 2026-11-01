@@ -99,3 +99,17 @@ pip install homeassistant==2026.10.4 prometheus-client==0.21.0 pytest pytest-asy
 python -m pytest tests/homeassistant -v
 python -m unittest discover -s homeassistant/myuplink_cloud -v
 ```
+
+## Dashboard
+
+`dashboard-ctc.json` is a native Home Assistant dashboard (JSON is valid YAML).
+Create an empty dashboard and paste the file into its Raw configuration editor.
+It has Swedish Overview, Space heating, Hot water and Heat pump views using
+built-in tile, history, entities and logbook cards. No HACS frontend cards are
+required. Verify entity IDs against your entity registry; the sample uses the
+IDs created for a first CTC EcoZenith i360 installation. History and logbook use
+Home Assistant Recorder, not the separate Prometheus database.
+
+Integration 0.1.2 ignores CTC EcoZenith numeric values of -32768 observed during
+mode transitions; existing entities become unavailable until valid values
+return. It does not remove invalid samples already stored in Recorder.

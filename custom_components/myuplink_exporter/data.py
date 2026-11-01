@@ -41,6 +41,11 @@ def parse_snapshot(text, max_age=300, now=None):
         elif s.name == "myuplink_system_has_alarm":
             devices[(system, "system")] = dict(deviceName="myUplink system")
             values[(system, "system", "alarm")] = dict(value=s.value == 1, name="Active alarm", binary=True, device_class="problem")
+    # CTC uses -32768 for missing measurements, including during mode changes.
+    # Exclude these points so existing entities become unavailable, not numeric.
+    values = {key: point for key, point in values.items()
+              if not (devices.get(key[:2], {}).get("deviceName", "").startswith("CTC EcoZenith")
+                      and point["value"] == -32768)}
     for key, point in values.items():
         if point.get("unit") == "kW" and key[2] in ("62168", "62361"):
             point["name"] = {"62168": "Auxiliary heater power", "62361": "Immersion heater power"}[key[2]]
